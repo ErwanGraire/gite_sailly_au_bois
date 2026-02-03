@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Gîte - Évasion & Nature</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-container">
+        <h1 class="logo">Mon Gîte</h1>
+        <ul class="nav-links">
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="#le-gite">Le Gîte</a></li>
+            <li><a href="#decouvrir">Découvrir</a></li>
+            <li><a href="#reserver" class="btn btn-nav">Réserver</a></li>
+        </ul>
+    </div>
+</nav>
+
+<header id="accueil" class="hero">
+    <div class="container hero-content">
+        <h2 class="hero-title">Évadez-vous en pleine nature</h2>
+        <p class="hero-subtitle">Un séjour authentique au cœur de Sailly-au-Bois.</p>
+        <a href="#decouvrir" class="btn btn-hero">Découvrir l'histoire</a>
+    </div>
+</header>
+
+<section id="le-gite" class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Le Gîte</span>
+            <h3 class="section-title">Votre futur cocon</h3>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800" alt="Salon"></div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=800" alt="Chambre"></div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800" alt="Salle de bain"></div>
+            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800" alt="Cuisine"></div>
+        </div>
+    </div>
+</section>
+
+<section id="decouvrir" class="section alt-bg">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">L'Expérience</span>
+            <h3 class="section-title">Au cœur de Sailly-au-Bois</h3>
+        </div>
+
+        <div class="discovery-grid">
+            <div class="discovery-text">
+                <h4>Un voisin de prestige : l'Église Saint-Sulpice</h4>
+                <p>Séjourner dans notre gîte, c'est s'offrir une parenthèse au pied de l'église du village. Ce monument, symbole de la reconstruction, veille sur le calme de la place. C'est le point de départ idéal pour vos balades matinales au son discret du clocher.</p>
+
+                <h4>Le Circuit du Souvenir</h4>
+                <p>Idéalement situé à la frontière de l'Artois et de la Somme, le gîte est une base stratégique pour explorer les sites de mémoire (Thiepval, Beaumont-Hamel) à moins de 15 minutes.</p>
+            </div>
+
+            <div class="activities-box">
+                <div class="activity-item">
+                    <span>🥾</span>
+                    <div>
+                        <strong>Rando des Coquelicots</strong>
+                        <p>Sentiers balisés accessibles dès la sortie du gîte.</p>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <span>🏰</span>
+                    <div>
+                        <strong>Arras & ses Places</strong>
+                        <p>À 25 min, découvrez le Beffroi classé à l'UNESCO.</p>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <span>🚲</span>
+                    <div>
+                        <strong>Cyclo-tourisme</strong>
+                        <p>Boucles de 10 à 30km à travers les plaines artésiennes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="reserver" class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Contact</span>
+            <h3 class="section-title">Réserver votre séjour à Sailly-au-Bois</h3>
+        </div>
+
+        <form action="https://formspree.io/f/mnjzyngz" method="POST" class="booking-form">
+
+            <div class="form-group">
+                <input type="text" name="nom_complet" placeholder="Votre nom complet" required>
+                <input type="email" name="email_client" placeholder="Votre email" required>
+            </div>
+
+            <div class="form-group">
+                <div class="date-input">
+                    <label>Arrivée :</label>
+                    <input type="date" name="date_arrivee" required>
+                </div>
+                <div class="date-input">
+                    <label>Départ :</label>
+                    <input type="date" name="date_depart" required>
+                </div>
+            </div>
+
+            <textarea name="message_perso" rows="5" placeholder="Besoin d'un lit bébé ? Des questions sur les randonnées autour de l'église ?"></textarea>
+
+            <button type="submit" class="btn btn-hero">Envoyer la demande de réservation</button>
+        </form>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2026 Mon Gîte à Sailly-au-Bois. Tous droits réservés.</p>
+</footer>
+
+</body>
+</html>
