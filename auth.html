@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion / Inscription - Gîte de Sailly-au-Bois</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(106, 127, 78, 0.1), rgba(44, 62, 80, 0.1));
+            padding: 20px;
+        }
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            padding: 50px;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .auth-header h1 {
+            font-family: var(--serif);
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        .auth-header p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 12px 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #888;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            position: relative;
+            bottom: -2px;
+        }
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .auth-form {
+            display: none;
+        }
+        .auth-form.active {
+            display: block;
+            animation: fadeInUp 0.3s ease;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106, 127, 78, 0.1);
+        }
+        .form-group input.error {
+            border-color: #c33;
+            background: #fee;
+        }
+        .form-error {
+            color: #c33;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        .form-error.show {
+            display: block;
+        }
+        .auth-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        .auth-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 127, 78, 0.3);
+        }
+        .auth-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        .auth-message.success {
+            background: #efe;
+            border: 2px solid #3c3;
+            color: #3c3;
+            display: block;
+        }
+        .auth-message.error {
+            background: #fee;
+            border: 2px solid #c33;
+            color: #c33;
+            display: block;
+        }
+        .auth-divider {
+            text-align: center;
+            margin: 25px 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            font-size: 0.95rem;
+        }
+        .auth-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.41 0-8-3.59-8-8V8l8-4 8 4v4c0 4.41-3.59 8-8 8z"/>
+                </svg>
+            </div>
+            <span>Gîte Sailly</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="gite.html">Le Gîte</a></li>
+            <li><a href="decouvrir.html">Découvrir</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="auth-container" style="margin-top: 80px;">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Bienvenue</h1>
+            <p>Connectez-vous ou créez un compte pour réserver</p>
+        </div>
+
+        <div id="auth-message" class="auth-message"></div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="connexion">Connexion</button>
+            <button class="auth-tab" data-tab="inscription">Inscription</button>
+        </div>
+
+        <!-- Formulaire Connexion -->
+        <form id="connexion-form" class="auth-form active">
+            <div class="form-group">
+                <label for="connexion-email">Email</label>
+                <input type="email" id="connexion-email" name="email" placeholder="votre-email@exemple.com" required>
+                <div class="form-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="connexion-password">Mot de passe</label>
+                <input type="password" id="connexion-password" name="password" placeholder="••••••••" required>
+                <div class="form-error"></div>
+            </div>
+            <button type="submit" class="auth-submit">Se connecter</button>
+        </form>
+
+        <!-- Formulaire Inscription -->
+        <form id="inscription-form" class="auth-form">
+            <div class="form-group">
+                <label for="inscription-nom">Nom complet</label>
+                <input type="text" id="inscription-nom" name="nom" placeholder="Jean Dupont" required>
+                <div class="form-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="inscription-email">Email</label>
+                <input type="email" id="inscription-email" name="email" placeholder="votre-email@exemple.com" required>
+                <div class="form-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="inscription-password">Mot de passe</label>
+                <input type="password" id="inscription-password" name="password" placeholder="••••••••" required>
+                <div class="form-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="inscription-password-confirm">Confirmer le mot de passe</label>
+                <input type="password" id="inscription-password-confirm" name="password-confirm" placeholder="••••••••" required>
+                <div class="form-error"></div>
+            </div>
+            <button type="submit" class="auth-submit">S'inscrire</button>
+        </form>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>
+

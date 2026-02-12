@@ -1,0 +1,31 @@
+{
+  "reservations": [
+    {
+      "id": 1,
+      "nom": "Dupont Jean",
+      "email": "jean.dupont@email.com",
+      "dateArrivee": "2024-06-15",
+      "dateDepart": "2024-06-22",
+      "statut": "confirmee",
+      "dateCreation": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "nom": "Martin Sophie",
+      "email": "sophie.martin@email.com",
+      "dateArrivee": "2024-07-01",
+      "dateDepart": "2024-07-10",
+      "statut": "confirmee",
+      "dateCreation": "2024-01-14T14:45:00Z"
+    },
+    {
+      "id": 3,
+      "nom": "Leclerc Marc",
+      "email": "marc.leclerc@email.com",
+      "dateArrivee": "2024-08-05",
+      "dateDepart": "2024-08-12",
+      "statut": "confirmee",
+      "dateCreation": "2024-01-10T09:15:00Z"
+    }
+  ]
+}

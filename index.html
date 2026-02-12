@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Gîte - Évasion & Nature</title>
+    <title>Gîte de Sailly-au-Bois | Accueil</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,117 +11,134 @@
 
 <nav class="navbar">
     <div class="container nav-container">
-        <h1 class="logo">Mon Gîte</h1>
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.41 0-8-3.59-8-8V8l8-4 8 4v4c0 4.41-3.59 8-8 8z"/>
+                </svg>
+            </div>
+            <span>Gîte Sailly</span>
+        </a>
         <ul class="nav-links">
-            <li><a href="#accueil">Accueil</a></li>
-            <li><a href="#le-gite">Le Gîte</a></li>
-            <li><a href="#decouvrir">Découvrir</a></li>
-            <li><a href="#reserver" class="btn btn-nav">Réserver</a></li>
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="gite.html">Le Gîte</a></li>
+            <li><a href="decouvrir.html">Découvrir</a></li>
+            <li id="nav-auth-container" style="display: flex; align-items: center; gap: 15px;"></li>
         </ul>
     </div>
 </nav>
 
-<header id="accueil" class="hero">
+<header class="hero">
     <div class="container hero-content">
-        <h2 class="hero-title">Évadez-vous en pleine nature</h2>
-        <p class="hero-subtitle">Un séjour authentique au cœur de Sailly-au-Bois.</p>
-        <a href="#decouvrir" class="btn btn-hero">Découvrir l'histoire</a>
+        <h2 class="hero-title">Le calme absolu à Sailly-au-Bois</h2>
+        <p class="hero-subtitle">Une parenthèse enchantée au pied de l'église Saint-Sulpice, au cœur des Hauts-de-France.</p>
+        <div class="hero-btns">
+            <a href="gite.html" class="btn btn-hero">
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                </span>
+                Voir le gîte
+            </a>
+            <a href="decouvrir.html" class="btn btn-outline">
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                    </svg>
+                </span>
+                Explorer la région
+            </a>
+        </div>
     </div>
 </header>
-
-<section id="le-gite" class="section">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-subtitle">Le Gîte</span>
-            <h3 class="section-title">Votre futur cocon</h3>
-        </div>
-        <div class="gallery-grid">
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800" alt="Salon"></div>
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=800" alt="Chambre"></div>
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800" alt="Salle de bain"></div>
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800" alt="Cuisine"></div>
-        </div>
-    </div>
-</section>
-
-<section id="decouvrir" class="section alt-bg">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-subtitle">L'Expérience</span>
-            <h3 class="section-title">Au cœur de Sailly-au-Bois</h3>
-        </div>
-
-        <div class="discovery-grid">
-            <div class="discovery-text">
-                <h4>Un voisin de prestige : l'Église Saint-Sulpice</h4>
-                <p>Séjourner dans notre gîte, c'est s'offrir une parenthèse au pied de l'église du village. Ce monument, symbole de la reconstruction, veille sur le calme de la place. C'est le point de départ idéal pour vos balades matinales au son discret du clocher.</p>
-
-                <h4>Le Circuit du Souvenir</h4>
-                <p>Idéalement situé à la frontière de l'Artois et de la Somme, le gîte est une base stratégique pour explorer les sites de mémoire (Thiepval, Beaumont-Hamel) à moins de 15 minutes.</p>
-            </div>
-
-            <div class="activities-box">
-                <div class="activity-item">
-                    <span>🥾</span>
-                    <div>
-                        <strong>Rando des Coquelicots</strong>
-                        <p>Sentiers balisés accessibles dès la sortie du gîte.</p>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <span>🏰</span>
-                    <div>
-                        <strong>Arras & ses Places</strong>
-                        <p>À 25 min, découvrez le Beffroi classé à l'UNESCO.</p>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <span>🚲</span>
-                    <div>
-                        <strong>Cyclo-tourisme</strong>
-                        <p>Boucles de 10 à 30km à travers les plaines artésiennes.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
 <section id="reserver" class="section">
     <div class="container">
         <div class="section-header">
-            <span class="section-subtitle">Contact</span>
-            <h3 class="section-title">Réserver votre séjour à Sailly-au-Bois</h3>
+            <span class="section-subtitle">Prêt à partir ?</span>
+            <h3 class="section-title">Réserver votre séjour</h3>
         </div>
 
-        <form action="https://formspree.io/f/mnjzyngz" method="POST" class="booking-form">
+        <div id="auth-required-message" style="display: none; text-align: center; margin-bottom: 30px; padding: 25px; background: #e3f2fd; border-radius: 10px; border-left: 4px solid #3b82f6;">
+            <p style="font-size: 1.1rem; color: #1e40af; margin-bottom: 15px;">
+                <strong>🔐 Authentification requise</strong>
+            </p>
+            <p style="font-size: 0.95rem; color: #1e40af; margin-bottom: 15px;">
+                Inscrivez-vous ou connectez-vous pour réserver votre séjour en toute sécurité.
+            </p>
+            <a href="auth.html" class="btn btn-hero">Se connecter / S'inscrire</a>
+        </div>
 
-            <div class="form-group">
-                <input type="text" name="nom_complet" placeholder="Votre nom complet" required>
-                <input type="email" name="email_client" placeholder="Votre email" required>
+        <div id="booking-section" style="display: none;">
+            <div id="disponibilites-info" style="text-align: center; margin-bottom: 30px; padding: 15px; background: #f0f9ff; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                <p style="font-size: 0.95rem; color: #1e40af; margin: 0;">
+                    <strong>ℹ️ Légende du calendrier :</strong>
+                    <span style="display: inline-block; margin: 0 15px;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #3c3; border-radius: 2px; margin-right: 5px; vertical-align: middle;"></span>
+                        Disponible
+                    </span>
+                    <span style="display: inline-block;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #c33; border-radius: 2px; margin-right: 5px; vertical-align: middle;"></span>
+                        Réservé
+                    </span>
+                </p>
             </div>
 
-            <div class="form-group">
-                <div class="date-input">
-                    <label>Arrivée :</label>
-                    <input type="date" name="date_arrivee" required>
-                </div>
-                <div class="date-input">
-                    <label>Départ :</label>
-                    <input type="date" name="date_depart" required>
-                </div>
-            </div>
+            <!-- Calendrier -->
+            <div id="calendar-container" class="calendar-container"></div>
 
-            <textarea name="message_perso" rows="5" placeholder="Besoin d'un lit bébé ? Des questions sur les randonnées autour de l'église ?"></textarea>
-
-            <button type="submit" class="btn btn-hero">Envoyer la demande de réservation</button>
-        </form>
+            <form action="https://formspree.io/f/mnjzyngz" method="POST" class="booking-form">
+                <div class="form-group">
+                    <input type="text" name="nom" placeholder="Nom complet" required>
+                    <input type="email" name="email" placeholder="Votre email" required>
+                </div>
+                <div class="form-group">
+                    <div class="date-input">
+                        <label>
+                            <span class="icon" style="margin-right: 5px;">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                                </svg>
+                            </span>
+                            Arrivée
+                        </label>
+                        <input type="date" name="arrivee" required>
+                    </div>
+                    <div class="date-input">
+                        <label>
+                            <span class="icon" style="margin-right: 5px;">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                                </svg>
+                            </span>
+                            Départ
+                        </label>
+                        <input type="date" name="depart" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea name="message" rows="4" placeholder="Votre message, questions..." style="width: 100%;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-hero" style="width: 100%;">
+                    <span class="icon" style="margin-right: 8px;">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                        </svg>
+                    </span>
+                    Envoyer ma demande
+                </button>
+            </form>
+        </div>
     </div>
 </section>
 
 <footer>
-    <p>&copy; 2026 Mon Gîte à Sailly-au-Bois. Tous droits réservés.</p>
+    <p>&copy; 2024 Gîte de Sailly-au-Bois. Tous droits réservés.</p>
 </footer>
 
+<script src="auth-utils.js"></script>
+<script src="calendrier.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
