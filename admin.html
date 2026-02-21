@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Gîte Sailly</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container { margin-top: 100px; padding-bottom: 50px; }
+        .admin-section { background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
+        th { background: var(--light-gray); color: var(--primary); font-family: var(--serif); }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .badge-attente { background: #fff3e0; color: #ef6c00; }
+        .badge-valide { background: #e8f5e9; color: #2e7d32; }
+        .badge-annule { background: #ffebee; color: #c62828; }
+        .btn-action { padding: 5px 10px; border-radius: 5px; cursor: pointer; border: none; font-size: 0.8rem; margin-right: 5px; }
+        .btn-valider { background: #4caf50; color: white; }
+        .btn-annuler { background: #f44336; color: white; }
+
+        /* Overlay de connexion */
+        #admin-login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--secondary); z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div id="admin-login-overlay">
+    <div class="booking-form" style="max-width: 400px; width: 90%; text-align: center;">
+        <h2 style="font-family: var(--serif); margin-bottom: 20px;">Espace Propriétaire</h2>
+        <div class="form-group">
+            <input type="email" id="admin-email" placeholder="admin@gite-sailly.fr" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="admin-password" placeholder="Mot de passe" required>
+        </div>
+        <button onclick="tentativeConnexionAdmin()" class="btn btn-hero" style="width: 100%;">Se connecter</button>
+        <p id="admin-error" style="color: #c33; margin-top: 15px; font-size: 0.85rem; display: none;">Identifiants incorrects.</p>
+        <a href="index.html" style="display: block; margin-top: 20px; color: var(--primary); font-size: 0.85rem;">Retour au site</a>
+    </div>
+</div>
+
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="index.html" class="logo"><span>Admin Gîte</span></a>
+        <ul class="nav-links">
+            <li><a href="index.html">Retour au site</a></li>
+            <li><button onclick="deconnecterAdmin()" class="btn-action btn-annuler" style="padding: 8px 15px;">Quitter</button></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container admin-container">
+    <h2 class="section-title" style="text-align: left;">Tableau de Bord Propriétaire</h2>
+
+    <div class="admin-section">
+        <h3>Demandes de réservations</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Client</th>
+                <th>Dates</th>
+                <th>Message</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="admin-res-body"></tbody>
+        </table>
+    </div>
+
+    <div class="admin-section">
+        <h3>Utilisateurs inscrits</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Date d'inscription</th>
+            </tr>
+            </thead>
+            <tbody id="admin-users-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="auth-utils.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

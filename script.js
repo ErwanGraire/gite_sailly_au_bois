@@ -253,13 +253,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Les dates sont valides - sauvegarder la réservation AVANT Formspree
             const utilisateur = JSON.parse(utilisateurConnecte);
+            // --- Dans script.js ---
             const nouvelleReservation = {
                 id: Date.now(),
                 nom: inputNom.value,
                 email: inputEmail.value,
                 dateArrivee: inputArrivee.value,
                 dateDepart: inputDepart.value,
-                statut: 'confirmee',
+                statut: 'en-attente', // <-- Change 'confirmee' par 'en-attente'
                 message: document.querySelector('textarea[name="message"]').value || '',
                 dateCreation: new Date().toISOString()
             };

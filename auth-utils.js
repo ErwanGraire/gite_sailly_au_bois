@@ -22,42 +22,21 @@ function deconnecter() {
     window.location.href = 'auth.html';
 }
 
-// Mettre à jour la navbar
 function mettreAJourNavbar() {
     const utilisateur = obtenirUtilisateurConnecte();
     const navAuthContainer = document.getElementById('nav-auth-container');
 
-    if (!navAuthContainer) {
-        console.log('⚠️ nav-auth-container non trouvé');
-        return;
-    }
+    if (!navAuthContainer) return;
 
     if (utilisateur) {
-        navAuthContainer.innerHTML = `
-            <li style="margin-left: 0;">
-                <span style="color: var(--dark); font-weight: 600; font-size: 0.95rem;">
-                    Bienvenue, ${utilisateur.nom.split(' ')[0]} !
-                </span>
-            </li>
-            <li style="margin-left: 1rem;">
-                <a href="mon-compte.html" class="btn btn-nav" style="padding: 8px 16px; font-size: 0.85rem;">
-                    Mon Compte
-                </a>
-            </li>
-            <li style="margin-left: 0.5rem;">
-                <button onclick="deconnecter()" class="btn btn-nav" style="padding: 8px 16px; font-size: 0.85rem;">
-                    Déconnexion
-                </button>
-            </li>
-        `;
-        console.log('✅ Navbar mise à jour pour utilisateur connecté:', utilisateur.nom);
-    } else {
-        navAuthContainer.innerHTML = `
-            <li style="margin-left: 0;">
-                <a href="auth.html" class="btn btn-nav">Connexion</a>
-            </li>
-        `;
-        console.log('⚠️ Navbar : pas d\'utilisateur connecté');
+            // On injecte les éléments directement sans div de surplus
+            navAuthContainer.innerHTML = `
+                <span class="nav-welcome">Bienvenue, ${utilisateur.nom.split(' ')[0]} !</span>
+                <a href="mon-compte.html" class="btn btn-nav-small">Mon Compte</a>
+                <button onclick="deconnecter()" class="btn btn-nav-small btn-logout-nav">Déconnexion</button>
+            `;
+        } else {
+        navAuthContainer.innerHTML = `<a href="auth.html" class="btn btn-nav">Connexion</a>`;
     }
 }
 

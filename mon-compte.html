@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Compte - Gîte de Sailly-au-Bois</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mon-compte.css">
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+           emailjs.init("Cj8CA4NPKdZs8yQxe");
+        })();
+    </script>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="index.html" class="logo"><span>Gîte Sailly</span></a>
+        <ul class="nav-links">
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="gite.html">Le Gîte</a></li>
+            <li><a href="decouvrir.html">Découvrir</a></li>
+            <li id="nav-auth-container"></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container account-page-wrapper">
+    <h2 class="section-title">Mon Espace Personnel</h2>
+
+    <div class="account-grid">
+        <aside class="profile-card">
+            <div class="profile-info">
+                <div class="profile-avatar-container">
+                    <div id="user-avatar" class="profile-avatar">?</div>
+                    <label for="upload-photo" class="photo-edit-btn">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
+                            <path d="M3 4V1a1 1 0 0 1 2 0v3h3a1 1 0 0 1 0 2H5v3a1 1 0 0 1-2 0V6H0a1 1 0 0 1 0-2h3zM6 10V7h3a3 3 0 0 0 6 0h3v3h2a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1h4z"/>
+                        </svg>
+                    </label>
+                    <input type="file" id="upload-photo" style="display:none" accept="image/*">
+                </div>
+
+                <div class="info-group">
+                    <label>NOM COMPLET</label>
+                    <input type="text" id="edit-nom" class="profile-input">
+                </div>
+
+                <div class="info-group">
+                    <label>TÉLÉPHONE</label>
+                    <input type="tel" id="edit-tel" class="profile-input">
+                </div>
+
+                <div class="info-group">
+                    <label>ADRESSE EMAIL (Identifiant)</label>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
+                        <p id="user-email" style="margin:0; font-weight: 600; word-break: break-all;"></p>
+                        <span id="status-badge"></span>
+                    </div>
+
+                    <div id="verification-zone" style="display:none; margin-top: 15px; background: #fff5f5; padding: 15px; border-radius: 10px; border: 1px solid #feb2b2;">
+                        <p style="font-size: 0.85rem; color: #c53030; margin-bottom: 8px; line-height: 1.4;">
+                            ⚠️ Votre compte n'est pas vérifié. Certaines fonctionnalités peuvent être limitées.
+                        </p>
+                        <button onclick="envoyerLienValidation()" class="btn-small-link" style="color: var(--primary); font-weight: bold; text-decoration: underline; display: block;">
+                            Recevoir le lien de validation par email
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="enregistrerModifications()" class="btn btn-hero" style="width: 100%; margin-bottom: 15px;">
+                    Enregistrer les modifications
+                </button>
+
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+
+                <h4 style="margin-bottom: 20px; font-family: var(--serif);">Sécurité</h4>
+
+                <div class="info-group">
+                    <label>ANCIEN MOT DE PASSE</label>
+                    <input type="password" id="old-password" class="profile-input" placeholder="••••••••">
+                </div>
+
+                <div class="info-group">
+                    <label>NOUVEAU MOT DE PASSE</label>
+                    <input type="password" id="new-password" class="profile-input" placeholder="••••••••">
+                </div>
+
+                <button onclick="changerMotDePasse()" class="btn btn-nav" style="width: 100%; background: #555; border: none; margin-bottom: 15px;">
+                    Mettre à jour le mot de passe
+                </button>
+
+                <p id="password-message" style="display:none; margin-top: 10px; font-size: 0.85rem; font-weight: 600;"></p>
+
+                <button onclick="deconnecter()" class="btn btn-logout">
+                    Se déconnecter
+                </button>
+
+                <p id="update-message" style="display:none; margin-top: 15px; font-size: 0.85rem; font-weight: 600;"></p>
+            </div>
+        </aside>
+
+        <main class="reservations-card">
+            <h4>Mes demandes de séjour</h4>
+            <div id="reservations-list">
+                <p class="no-res">Recherche de vos séjours en cours...</p>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="auth-utils.js"></script>
+<script src="mon-compte.js"></script>
+</body>
+</html>

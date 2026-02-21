@@ -1,0 +1,159 @@
+.account-page-wrapper {
+    margin-top: 120px;
+    padding-bottom: 60px;
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.profile-card, .reservations-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.profile-info { text-align: center; }
+
+.profile-avatar {
+    width: 90px; height: 90px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; font-weight: 700;
+    margin: 0 auto 20px;
+}
+
+.info-group { margin-bottom: 25px; text-align: left; }
+.info-group label { display: block; font-size: 0.75rem; color: #999; font-weight: 700; letter-spacing: 1px; }
+.info-group p { font-size: 1.1rem; color: var(--dark); font-weight: 600; margin-top: 5px; }
+
+.btn-logout {
+    background: #fff;
+    color: #c33;
+    border: 2px solid #c33;
+    width: 100%;
+    border-radius: 50px;
+    padding: 12px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-logout:hover { background: #fee; }
+
+.res-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 25px 0; border-bottom: 1px solid #f0f0f0;
+}
+
+.res-status {
+    padding: 6px 15px; border-radius: 30px; font-size: 0.85rem; font-weight: 600;
+    background: #e8f5e9; color: #2e7d32;
+}
+
+@media (max-width: 768px) {
+    .account-grid { grid-template-columns: 1fr; }
+}
+
+/* Couleurs des différents statuts sur le compte client */
+.res-status.status-pending {
+    background: #fff3e0;
+    color: #ef6c00; /* Orange */
+}
+
+.res-status.status-confirmed {
+    background: #e8f5e9;
+    color: #2e7d32; /* Vert */
+}
+
+.res-status.status-rejected {
+    background: #ffebee;
+    color: #c62828; /* Rouge */
+}
+
+.profile-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-top: 5px;
+    background: #fdfdfd;
+    transition: all 0.3s ease;
+}
+
+.profile-input:focus {
+    border-color: var(--primary);
+    background: #fff;
+    outline: none;
+}
+
+.btn-small-link {
+    background: none; border: none; color: #888; text-decoration: underline; cursor: pointer; font-size: 0.8rem;
+}
+.btn-small-link:hover { color: #c33; }
+
+.profile-avatar-container {
+    position: relative;
+    width: 90px;
+    margin: 0 auto 20px;
+}
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--primary);
+    color: white;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.photo-edit-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid white;
+    transition: all 0.3s ease;
+}
+
+.photo-edit-btn:hover { transform: scale(1.1); }
+
+
+ /* Aligne l'email et le badge proprement */
+ .info-group div[style*="flex-wrap"] {
+     display: flex !important;
+     align-items: center;
+     gap: 12px;
+     flex-wrap: wrap; /* Le badge passe dessous si l'email est trop long */
+ }
+
+ #status-badge small {
+     white-space: nowrap; /* Empêche le badge de se couper en deux */
+     display: inline-block;
+ }
+
+ #user-email {
+     word-break: break-all; /* Coupe l'email s'il est vraiment trop long */
+     font-size: 1rem;
+ }

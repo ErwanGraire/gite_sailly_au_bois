@@ -29,6 +29,54 @@ body {
     z-index: 1000;
     transition: all 0.3s ease;
 }
+
+/* --- HARMONISATION DE LA NAVBAR CONNECTÉE --- */
+
+/* On aligne parfaitement le texte "Bienvenue" et les boutons */
+#nav-auth-container {
+    display: flex !important;
+    align-items: center;
+    gap: 15px;
+    height: 100%; /* S'assure de prendre toute la hauteur de la navbar */
+}
+
+.nav-welcome {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-right: 5px;
+}
+
+/* Le bouton "Mon Compte" devient vert et de taille standard */
+.btn-nav-small {
+    padding: 10px 20px !important; /* Taille augmentée pour la cohérence */
+    font-size: 0.9rem !important;
+    border-radius: 50px !important;
+    text-decoration: none;
+    font-weight: 600;
+    background-color: var(--primary) !important; /* Retour au vert forêt */
+    color: white !important;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-nav-small:hover {
+    transform: translateY(-2px);
+    background-color: #5a6d3f !important;
+}
+
+/* Le bouton déconnexion reste discret mais aligné */
+.btn-logout-nav {
+    background-color: transparent !important;
+    border: 2px solid #c33 !important;
+    color: #c33 !important;
+}
+
+.btn-logout-nav:hover {
+    background-color: #fee !important;
+}
+
+
 .nav-container { display: flex; justify-content: space-between; align-items: center; }
 .logo {
     font-family: var(--serif);
@@ -551,4 +599,37 @@ footer {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+/* --- FIX NAVBAR CONNECTÉE --- */
+.nav-auth-wrapper {
+    display: flex !important; /* Force l'alignement horizontal */
+    align-items: center;
+    gap: 15px; /* Crée l'espace entre Bienvenue, Compte et Déconnexion */
+}
+
+.nav-welcome {
+    white-space: nowrap; /* Empêche le nom de revenir à la ligne */
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.btn-nav-small {
+    padding: 8px 16px !important;
+    font-size: 0.8rem !important;
+    border-radius: 50px !important;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn-logout-nav {
+    background: transparent !important;
+    border: 1px solid #c33 !important;
+    color: #c33 !important;
+    box-shadow: none !important;
+}
+
+.btn-logout-nav:hover {
+    background: #fee !important;
 }
