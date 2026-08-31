@@ -80,23 +80,24 @@ async function envoyerLienValidation() {
     btn.disabled = true;
 
     // 2. Paramètres envoyés à EmailJS
-    // Assurez-vous que ces noms correspondent à vos {{ }} sur EmailJS
     const templateParams = {
+        email: user.email,     // ✅ Remplira {{email}} pour que le mail parte au client !
         name: user.nom,
         time: new Date().toLocaleString('fr-FR'),
-        lien_validation: lien, // <--- C'est cette variable qu'il faut utiliser
+        lien_validation: lien,
         message: "Merci de valider votre inscription pour profiter pleinement de notre Gîte."
     };
 
     // 3. Envoi via EmailJS
     emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
         .then(function() {
-            alert("✅ Email envoyé avec le lien de validation !");
+            alert("✅ Email envoyé à " + user.email + " avec le lien de validation !");
             btn.textContent = "Email envoyé";
         }, function(error) {
             console.error("Erreur EmailJS:", error);
             alert("❌ Échec de l'envoi.");
             btn.disabled = false;
+            btn.textContent = "Recevoir le lien de validation par email";
         });
 }
 

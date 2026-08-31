@@ -1,5 +1,6 @@
 window.addEventListener('scroll', function() {
     const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
     if (window.scrollY > 50) {
         navbar.style.background = '#ffffff';
         navbar.style.padding = '10px 50px';
@@ -17,14 +18,14 @@ async function chargerReservations() {
     try {
         const response = await fetch('reservations.json');
         const data = await response.json();
-        reservationsData = data.reservations;
+        reservationsData = data.reservations || [];
         console.log('✅ Réservations chargées depuis le fichier local');
     } catch (err) {
         console.log('⚠️ Impossible de charger reservations.json:', err);
         reservationsData = [];
     }
 
-    // Ajouter les réservations du localStorage (nouvelles réservations)
+    // Ajouter les réservations du localStorage
     const reservationsLocales = JSON.parse(localStorage.getItem('reservations')) || [];
     reservationsData = [...reservationsData, ...reservationsLocales];
 
@@ -32,22 +33,42 @@ async function chargerReservations() {
     mettreAJourDatesIndisponibles();
 }
 
-// Mettre à jour les dates indisponibles dans les champs de date
+// Mettre à jour les dates indisponibles et verrouiller les champs
 function mettreAJourDatesIndisponibles() {
     const datesIndisponibles = obtenirDatesIndisponibles();
 
-    // Générer le calendrier
-    genererCalendrier(datesIndisponibles);
+    // Générer le calendrier visuel s'il existe
+    if (typeof genererCalendrier === 'function') {
+        genererCalendrier(datesIndisponibles);
+    }
 
     const inputArrivee = document.querySelector('input[name="arrivee"]');
     const inputDepart = document.querySelector('input[name="depart"]');
 
     if (inputArrivee && inputDepart) {
-        // Ajouter un événement de changement pour valider les dates
-        inputArrivee.addEventListener('change', validerDates);
+        // 1. Bloquer la sélection de dates passées pour l'arrivée
+        const aujourdhui = new Date().toISOString().split('T')[0];
+        inputArrivee.min = aujourdhui;
+
+        // 2. Gestion du changement sur la date d'arrivée
+        inputArrivee.addEventListener('change', function() {
+            if (this.value) {
+                // Fixe le lendemain comme date minimale de départ
+                const dateMinDepart = new Date(this.value);
+                dateMinDepart.setDate(dateMinDepart.getDate() + 1);
+                inputDepart.min = dateMinDepart.toISOString().split('T')[0];
+
+                // Si le départ actuel est antérieur ou égal à la nouvelle arrivée, on l'efface
+                if (inputDepart.value && inputDepart.value <= this.value) {
+                    inputDepart.value = '';
+                }
+            }
+            validerDates();
+        });
+
+        // 3. Gestion du changement sur la date de départ
         inputDepart.addEventListener('change', validerDates);
 
-        // Empêcher les dates réservées
         inputArrivee.addEventListener('input', function() {
             restricterDatesIndisponibles(this, inputDepart);
         });
@@ -68,7 +89,7 @@ function estDateDisponible(dateStr) {
     });
 }
 
-// Obtenir les dates indisponibles
+// Obtenir la liste complète des dates indisponibles (YYYY-MM-DD)
 function obtenirDatesIndisponibles() {
     const datesIndisponibles = [];
 
@@ -76,7 +97,6 @@ function obtenirDatesIndisponibles() {
         const arrivee = new Date(reservation.dateArrivee);
         const depart = new Date(reservation.dateDepart);
 
-        // Inclure les dates d'arrivée et de départ
         for (let d = new Date(arrivee); d <= depart; d.setDate(d.getDate() + 1)) {
             datesIndisponibles.push(d.toISOString().split('T')[0]);
         }
@@ -86,23 +106,27 @@ function obtenirDatesIndisponibles() {
     return datesIndisponibles;
 }
 
-// Valider que les dates sélectionnées ne chevauchent pas
+// Valider que le départ est après l'arrivée et sans chevauchement
 function validerDates() {
     const inputArrivee = document.querySelector('input[name="arrivee"]');
     const inputDepart = document.querySelector('input[name="depart"]');
 
-    if (!inputArrivee || !inputDepart || !inputArrivee.value || !inputDepart.value) return;
+    if (!inputArrivee || !inputDepart || !inputArrivee.value || !inputDepart.value) {
+        cacherErreur();
+        return;
+    }
 
     const dateArrivee = new Date(inputArrivee.value);
     const dateDepart = new Date(inputDepart.value);
 
-    // Vérifier que départ > arrivée
+    // Vérifier ordre chronologique strict (départ > arrivée)
     if (dateDepart <= dateArrivee) {
-        afficherErreur('La date de départ doit être après la date d\'arrivée');
+        afficherErreur("La date de départ doit être strictement postérieure à la date d'arrivée.");
+        inputDepart.value = '';
         return;
     }
 
-    // Vérifier si les dates chevauchent une réservation existante
+    // Vérifier chevauchement avec une réservation existante
     const datesIndisponibles = obtenirDatesIndisponibles();
     let conflitTrouve = false;
 
@@ -116,7 +140,7 @@ function validerDates() {
     }
 
     if (conflitTrouve) {
-        afficherErreur('Ces dates ne sont pas disponibles. Veuillez choisir d\'autres dates.');
+        afficherErreur("Ces dates chevauchent une réservation existante. Veuillez choisir d'autres dates.");
         inputArrivee.value = '';
         inputDepart.value = '';
     } else {
@@ -197,7 +221,7 @@ function restricterDatesIndisponibles(input, autreInput) {
     input.setAttribute('data-dates-indisponibles', JSON.stringify(datesIndisponibles));
 }
 
-// Empêcher la soumission du formulaire avec des dates invalides
+// Initialisation et soumission
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📍 DOMContentLoaded dans script.js');
 
@@ -213,28 +237,35 @@ document.addEventListener('DOMContentLoaded', function() {
             const inputNom = document.querySelector('input[name="nom"]');
             const inputEmail = document.querySelector('input[name="email"]');
 
-            // Vérifier l'authentification
+            // 1. Vérification de l'authentification
             const utilisateurConnecte = localStorage.getItem('utilisateurConnecte');
             if (!utilisateurConnecte) {
                 e.preventDefault();
-                afficherErreur('Vous devez être connecté pour réserver. Veuillez vous inscrire d\'abord.');
+                afficherErreur("Vous devez être connecté pour réserver. Veuillez vous connecter ou vous inscrire.");
                 console.log('❌ Tentative de réservation sans authentification');
                 return;
             }
 
-            console.log('✅ Utilisateur authentifié');
-
+            // 2. Vérification des champs remplis
             if (!inputArrivee || !inputDepart || !inputArrivee.value || !inputDepart.value) {
                 e.preventDefault();
-                afficherErreur('Veuillez sélectionner les dates d\'arrivée et de départ');
+                afficherErreur("Veuillez sélectionner les dates d'arrivée et de départ.");
                 return;
             }
 
             const dateArrivee = new Date(inputArrivee.value);
             const dateDepart = new Date(inputDepart.value);
-            const datesIndisponibles = obtenirDatesIndisponibles();
 
-            // Vérification des conflits - STRICTE (inclut les limites)
+            // 3. Vérification de la cohérence départ > arrivée
+            if (dateDepart <= dateArrivee) {
+                e.preventDefault();
+                afficherErreur("La date de départ doit être strictement postérieure à la date d'arrivée.");
+                inputDepart.value = '';
+                return;
+            }
+
+            // 4. Vérification stricte des conflits
+            const datesIndisponibles = obtenirDatesIndisponibles();
             let conflitTrouve = false;
             for (let d = new Date(dateArrivee); d <= dateDepart; d.setDate(d.getDate() + 1)) {
                 const dateStr = d.toISOString().split('T')[0];
@@ -246,51 +277,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (conflitTrouve) {
                 e.preventDefault();
-                afficherErreur('Les dates sélectionnées sont déjà réservées. Veuillez choisir d\'autres dates.');
-                console.log('❌ Conflit de dates détecté');
+                afficherErreur("Les dates sélectionnées sont déjà réservées. Veuillez choisir d'autres dates.");
+                console.log('❌ Conflit de dates détecté à la soumission');
                 return;
             }
 
-            // Les dates sont valides - sauvegarder la réservation AVANT Formspree
-            const utilisateur = JSON.parse(utilisateurConnecte);
-            // --- Dans script.js ---
+            // 5. Sauvegarde locale
             const nouvelleReservation = {
                 id: Date.now(),
-                nom: inputNom.value,
-                email: inputEmail.value,
+                nom: inputNom ? inputNom.value : '',
+                email: inputEmail ? inputEmail.value : '',
                 dateArrivee: inputArrivee.value,
                 dateDepart: inputDepart.value,
-                statut: 'en-attente', // <-- Change 'confirmee' par 'en-attente'
-                message: document.querySelector('textarea[name="message"]').value || '',
+                statut: 'en-attente',
+                message: (document.querySelector('textarea[name="message"]') || {}).value || '',
                 dateCreation: new Date().toISOString()
             };
 
-            // Sauvegarder dans localStorage
             const reservationsLocales = JSON.parse(localStorage.getItem('reservations')) || [];
             reservationsLocales.push(nouvelleReservation);
             localStorage.setItem('reservations', JSON.stringify(reservationsLocales));
 
-            console.log('✅ Réservation sauvegardée localement:', nouvelleReservation);
-            console.log('📊 Total réservations:', reservationsLocales.length);
-
-            // Recharger les réservations pour mettre à jour l'affichage
+            console.log('✅ Réservation enregistrée localement:', nouvelleReservation);
             chargerReservations();
 
-            // Laisser Formspree gérer l'envoi email
-            afficherSucces('✅ Réservation confirmée ! Redirection vers votre compte...');
+            afficherSucces('✅ Réservation validée ! Redirection en cours...');
 
             setTimeout(() => {
                 window.location.href = 'mon-compte.html';
             }, 2000);
         });
-    } else {
-        console.log('⚠️ Formulaire de réservation non trouvé (page sans formulaire)');
     }
 
-    gererAffichageReservation();
+    if (typeof gererAffichageReservation === 'function') {
+        gererAffichageReservation();
+    }
 });
 
-// Animation pour le message d'erreur
+// Style CSS pour l'animation des messages
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
