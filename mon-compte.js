@@ -1,262 +1,300 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const utilisateur = obtenirUtilisateurConnecte(); // Récupéré depuis auth-utils.js
+    chargerProfilEtReservations();
 
-    if (!utilisateur) {
+    // Écouteur pour la photo de profil
+    const uploadInput = document.getElementById('upload-photo');
+    if (uploadInput) {
+        uploadInput.addEventListener('change', gererChangementPhoto);
+    }
+});
+
+// Récupère l'email propre de l'utilisateur quelle que soit la manière dont il a été stocké
+function recupererEmailActif() {
+    const raw = localStorage.getItem('utilisateurConnecte');
+    if (!raw) return null;
+
+    try {
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj === 'object' && obj.email) {
+            return obj.email.trim().toLowerCase();
+        }
+    } catch (e) {
+        // C'était une simple chaîne
+    }
+
+    return raw.replace(/['"]+/g, '').trim().toLowerCase();
+}
+
+// 1. CHARGEMENT DU PROFIL ET DES SÉJOURS
+function chargerProfilEtReservations() {
+    const emailConnecte = recupererEmailActif();
+    if (!emailConnecte) {
         window.location.href = 'auth.html';
         return;
     }
 
-    // 1. DÉTECTION DU LIEN DE VALIDATION (TOKEN)
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    if (token) {
-        validerCompteViaLien(token);
-    }
+    const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
+    const utilisateur = utilisateurs.find(u => (u.email || '').trim().toLowerCase() === emailConnecte);
 
-    // 2. REMPLISSAGE DES INFOS DU PROFIL
-    document.getElementById('edit-nom').value = utilisateur.nom;
-    document.getElementById('edit-tel').value = utilisateur.telephone || '';
-    document.getElementById('user-email').textContent = utilisateur.email;
+    // A. Remplissage des informations du profil
+    const inputNom = document.getElementById('edit-nom');
+    const inputTel = document.getElementById('edit-tel');
+    const textEmail = document.getElementById('user-email');
+    const badgeStatut = document.getElementById('status-badge');
+    const zoneVerification = document.getElementById('verification-zone');
+    const avatar = document.getElementById('user-avatar');
 
-    // Charger le visuel de l'avatar (Photo ou Initiale)
-    mettreAJourVisuelAvatar(utilisateur);
+    // Affichage obligatoire de l'adresse email
+    if (textEmail) textEmail.textContent = emailConnecte;
 
-    // Afficher le statut de vérification (Badge)
-    rafraichirAffichageStatut();
-
-    // 3. CHARGEMENT DES RÉSERVATIONS
-    afficherReservations(utilisateur.email);
-
-    // 4. ÉCOUTEUR POUR LE CHANGEMENT DE PHOTO
-    const photoInput = document.getElementById('upload-photo');
-    if (photoInput) {
-        photoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.size > 500000) {
-                alert("L'image est trop lourde (max 500 Ko).");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                sauvegarderPhoto(event.target.result);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-});
-
-// --- GESTION DU STATUT DE VÉRIFICATION (LIEN) ---
-function rafraichirAffichageStatut() {
-    const user = obtenirUtilisateurConnecte();
-    const badge = document.getElementById('status-badge');
-    const zone = document.getElementById('verification-zone');
-    if (!badge || !zone) return;
-
-    if (user.actif) {
-        badge.innerHTML = `<small style="background: #e8f5e9; color: #2e7d32;">Vérifié ✅</small>`;
-        zone.style.display = 'none';
-    } else {
-        badge.innerHTML = `<small style="background: #ffebee; color: #c62828;">Non vérifié ⏳</small>`;
-        zone.style.display = 'block';
-    }
-}
-
-// --- Dans mon-compte.js, remplacez la fonction envoyerLienValidation ---
-
-async function envoyerLienValidation() {
-    const user = obtenirUtilisateurConnecte();
-    const btn = document.querySelector("#verification-zone button");
-
-    if (!user) return;
-
-    // 1. Génération du lien de validation
-    const token = btoa(user.email);
-    const lien = window.location.origin + window.location.pathname + "?token=" + token;
-
-    btn.textContent = "⏳ Envoi en cours...";
-    btn.disabled = true;
-
-    // 2. Paramètres envoyés à EmailJS
-    const templateParams = {
-        email: user.email,     // ✅ Remplira {{email}} pour que le mail parte au client !
-        name: user.nom,
-        time: new Date().toLocaleString('fr-FR'),
-        lien_validation: lien,
-        message: "Merci de valider votre inscription pour profiter pleinement de notre Gîte."
-    };
-
-    // 3. Envoi via EmailJS
-    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
-        .then(function() {
-            alert("✅ Email envoyé à " + user.email + " avec le lien de validation !");
-            btn.textContent = "Email envoyé";
-        }, function(error) {
-            console.error("Erreur EmailJS:", error);
-            alert("❌ Échec de l'envoi.");
-            btn.disabled = false;
-            btn.textContent = "Recevoir le lien de validation par email";
-        });
-}
-
-function validerCompteViaLien(token) {
-    try {
-        const emailAValider = atob(token);
-        let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-        const session = obtenirUtilisateurConnecte();
-
-        utilisateurs = utilisateurs.map(u => {
-            if (u.email === emailAValider) return { ...u, actif: true };
-            return u;
-        });
-        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
-        if (session && session.email === emailAValider) {
-            session.actif = true;
-            localStorage.setItem('utilisateurConnecte', JSON.stringify(session));
-            alert("✅ Votre compte a été validé avec succès !");
-            window.history.replaceState({}, document.title, window.location.pathname);
-            rafraichirAffichageStatut();
+    if (utilisateur) {
+        if (inputNom) inputNom.value = utilisateur.nom || '';
+        if (inputTel) {
+            // Empêche d'afficher l'email dans le champ téléphone
+            inputTel.value = (utilisateur.telephone && !utilisateur.telephone.includes('@')) ? utilisateur.telephone : '';
         }
-    } catch(e) { console.error("Token invalide"); }
-}
 
-// --- GESTION DE LA PHOTO DE PROFIL ---
-function mettreAJourVisuelAvatar(user) {
-    const avatarDiv = document.getElementById('user-avatar');
-    if (!avatarDiv) return;
+        // Avatar
+        if (avatar) {
+            if (utilisateur.photo) {
+                avatar.innerHTML = `<img src="${utilisateur.photo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" alt="Avatar">`;
+            } else {
+                avatar.textContent = (utilisateur.nom || 'U').charAt(0).toUpperCase();
+            }
+        }
 
-    if (user.photo) {
-        avatarDiv.style.backgroundImage = `url(${user.photo})`;
-        avatarDiv.textContent = '';
-    } else {
-        avatarDiv.style.backgroundImage = 'none';
-        avatarDiv.textContent = user.nom.charAt(0).toUpperCase();
+        // Badge de validation du compte
+        if (badgeStatut) {
+            if (utilisateur.actif) {
+                badgeStatut.innerHTML = '<span class="badge badge-valide">Vérifié</span>';
+                if (zoneVerification) zoneVerification.style.display = 'none';
+            } else {
+                badgeStatut.innerHTML = '<span class="badge badge-attente">Non vérifié</span>';
+                if (zoneVerification) zoneVerification.style.display = 'block';
+            }
+        }
     }
-}
 
-function sauvegarderPhoto(imageString) {
-    const session = obtenirUtilisateurConnecte();
-    const utilisateurMaj = { ...session, photo: imageString };
+    // B. Remplissage des demandes de séjours
+    const reservationsToutes = JSON.parse(localStorage.getItem('reservations') || '[]');
+    
+    // Comparaison insensible aux majuscules/espaces
+    const mesReservations = reservationsToutes.filter(r => 
+        (r.email || '').trim().toLowerCase() === emailConnecte
+    );
 
-    localStorage.setItem('utilisateurConnecte', JSON.stringify(utilisateurMaj));
+    const conteneurListe = document.getElementById('reservations-list');
+    if (!conteneurListe) return;
 
-    let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-    utilisateurs = utilisateurs.map(u => {
-        if (u.email === session.email) return { ...u, photo: imageString };
-        return u;
-    });
-    localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
-    mettreAJourVisuelAvatar(utilisateurMaj);
-}
-
-// --- GESTION DES RÉSERVATIONS ---
-function afficherReservations(emailUser) {
-    const list = document.getElementById('reservations-list');
-    const data = JSON.parse(localStorage.getItem('reservations') || '[]');
-    const mesRes = data.filter(r => r.email === emailUser);
-
-    if (mesRes.length === 0) {
-        list.innerHTML = `<p class="no-res">Vous n'avez pas encore de séjour réservé.</p>`;
+    if (mesReservations.length === 0) {
+        conteneurListe.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px; color: #777;">
+                <p style="font-size: 1.1rem; margin-bottom: 15px;">Vous n'avez aucune demande de séjour pour le moment.</p>
+                <a href="index.html#reserver" class="btn btn-hero" style="font-size: 0.9rem; padding: 10px 20px;">
+                    Faire une réservation
+                </a>
+            </div>
+        `;
         return;
     }
 
-    list.innerHTML = '';
-    mesRes.forEach(res => {
-        let statutTexte = 'En attente';
-        let statutClasse = 'status-pending';
-        let boutonAnnulation = '';
+    conteneurListe.innerHTML = mesReservations.map(res => {
+        let badgeClass = 'badge-attente';
+        let statutTexte = 'En attente de validation hôte';
+        let boutonAction = '';
 
         if (res.statut === 'confirmee') {
-            statutTexte = 'Validée';
-            statutClasse = 'status-confirmed';
+            badgeClass = 'badge-valide';
+            statutTexte = 'Validée par l\'hôte';
+            boutonAction = `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${res.id})">Annuler le séjour</button>`;
         } else if (res.statut === 'annulee') {
-            statutTexte = 'Annulée';
-            statutClasse = 'status-rejected';
+            badgeClass = 'badge-annule';
+            statutTexte = 'Séjour annulé';
+            boutonAction = `<span style="color: #999; font-size: 0.8rem; font-style: italic;">Dossier clos</span>`;
+        } else {
+            boutonAction = `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${res.id})">Annuler la demande</button>`;
         }
 
-        if (res.statut !== 'annulee') {
-            boutonAnnulation = `
-                <div style="margin-top: 15px; border-top: 1px dashed #eee; padding-top: 10px;">
-                    <button onclick="document.getElementById('area-${res.id}').style.display='block'" class="btn-small-link">Annuler ce séjour</button>
-                    <div id="area-${res.id}" style="display:none; margin-top:10px;">
-                        <textarea id="motif-${res.id}" placeholder="Motif de l'annulation..." style="width:100%; border:1px solid #ddd; border-radius:5px; padding:8px; font-family:inherit; font-size:0.8rem;"></textarea>
-                        <button onclick="annulerSejour(${res.id})" class="btn-logout" style="padding: 5px 12px; font-size: 0.8rem; width: auto; margin-top: 5px; border-color: #c33;">Confirmer l'annulation</button>
-                    </div>
-                </div>`;
-        }
-
-        list.innerHTML += `
-            <div class="res-item" style="flex-direction: column; align-items: flex-start; padding: 20px; border-bottom: 1px solid #eee;">
-                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                    <div>
-                        <strong style="display: block; font-size: 1.1rem;">Séjour Gîte Sailly</strong>
-                        <span style="color: #666;">Du ${res.dateArrivee} au ${res.dateDepart}</span>
-                    </div>
-                    <span class="res-status ${statutClasse}">${statutTexte}</span>
+        let motifBloc = '';
+        if (res.motifAnnulation) {
+            motifBloc = `
+                <div style="margin-top: 10px; background: #fff5f5; border-left: 3px solid #e53e3e; padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; color: #c53030;">
+                    <strong>Motif d'annulation :</strong> ${res.motifAnnulation}
                 </div>
-                ${boutonAnnulation}
-            </div>`;
-    });
+            `;
+        }
+
+        return `
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <div>
+                        <!-- PASTILLE DU LOGEMENT -->
+                        <span style="font-weight: 700; color: var(--primary); background: #edf2e8; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; display: inline-block; margin-bottom: 8px;">
+                            ${res.logement || 'Domaine complet (5 logements)'}
+                        </span>
+                        <h4 style="margin: 0; font-family: var(--serif); font-size: 1.15rem; color: var(--dark);">
+                            Du ${res.dateArrivee} au ${res.dateDepart}
+                        </h4>
+                    </div>
+                    <div>
+                        <span class="badge ${badgeClass}">${statutTexte}</span>
+                    </div>
+                </div>
+
+                ${res.message ? `<p style="font-size: 0.9rem; color: #555; margin: 10px 0; background: #f8fafc; padding: 10px; border-radius: 8px;"><em>« ${res.message} »</em></p>` : ''}
+                ${motifBloc}
+
+                <div style="margin-top: 15px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                    ${boutonAction}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
-function annulerSejour(id) {
-    const motif = document.getElementById(`motif-${id}`).value;
-    if (motif.length < 5) return alert("Merci de préciser un motif (5 caractères min).");
-
-    if (confirm("Voulez-vous vraiment annuler ce séjour ?")) {
-        let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-        reservations = reservations.map(res => {
-            if (res.id === id) return { ...res, statut: 'annulee', motifAnnulation: motif };
-            return res;
-        });
-        localStorage.setItem('reservations', JSON.stringify(reservations));
-        location.reload();
-    }
-}
-
-// --- MODIFICATIONS DU PROFIL ---
+// 2. MODIFICATION DU PROFIL (Nom & Téléphone)
 function enregistrerModifications() {
-    const nouveauNom = document.getElementById('edit-nom').value.trim();
-    const nouveauTel = document.getElementById('edit-tel').value.trim();
-    const session = obtenirUtilisateurConnecte();
+    const emailConnecte = recupererEmailActif();
+    const inputNom = document.getElementById('edit-nom').value.trim();
+    const inputTel = document.getElementById('edit-tel').value.trim();
 
-    if (nouveauNom.length < 2) return alert("Le nom est trop court.");
+    if (!inputNom) {
+        afficherMessage('update-message', 'Le nom ne peut pas être vide.', '#c53030');
+        return;
+    }
 
     let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
     utilisateurs = utilisateurs.map(u => {
-        if (u.email === session.email) return { ...u, nom: nouveauNom, telephone: nouveauTel };
+        if ((u.email || '').trim().toLowerCase() === emailConnecte) {
+            return { ...u, nom: inputNom, telephone: inputTel };
+        }
         return u;
     });
+
     localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
-    const utilisateurMaj = { ...session, nom: nouveauNom, telephone: nouveauTel };
-    localStorage.setItem('utilisateurConnecte', JSON.stringify(utilisateurMaj));
-
-    mettreAJourVisuelAvatar(utilisateurMaj);
-    if (typeof mettreAJourNavbar === 'function') mettreAJourNavbar();
-    alert("✅ Vos informations ont été mises à jour !");
+    afficherMessage('update-message', 'Vos informations ont été enregistrées avec succès.', '#2e7d32');
+    chargerProfilEtReservations();
 }
 
-// --- CHANGEMENT DE MOT DE PASSE ---
+// 3. CHANGEMENT DE MOT DE PASSE
 function changerMotDePasse() {
-    const oldPass = document.getElementById('old-password').value;
-    const newPass = document.getElementById('new-password').value;
-    const session = obtenirUtilisateurConnecte();
+    const emailConnecte = recupererEmailActif();
+    const ancienPass = document.getElementById('old-password').value;
+    const nouveauPass = document.getElementById('new-password').value;
+
+    if (!ancienPass || !nouveauPass) {
+        afficherMessage('password-message', 'Veuillez renseigner les deux champs.', '#c53030');
+        return;
+    }
+
+    if (nouveauPass.length < 6) {
+        afficherMessage('password-message', 'Le mot de passe doit comporter au moins 6 caractères.', '#c53030');
+        return;
+    }
 
     let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-    const userIndex = utilisateurs.findIndex(u => u.email === session.email);
+    const user = utilisateurs.find(u => (u.email || '').trim().toLowerCase() === emailConnecte);
 
-    if (btoa(oldPass) !== utilisateurs[userIndex].password) return alert("L'ancien mot de passe est incorrect.");
-    if (newPass.length < 6) return alert("Le nouveau mot de passe doit faire au moins 6 caractères.");
+    if (!user || user.password !== ancienPass) {
+        afficherMessage('password-message', 'L\'ancien mot de passe est incorrect.', '#c53030');
+        return;
+    }
 
-    utilisateurs[userIndex].password = btoa(newPass);
+    utilisateurs = utilisateurs.map(u => {
+        if ((u.email || '').trim().toLowerCase() === emailConnecte) {
+            return { ...u, password: nouveauPass };
+        }
+        return u;
+    });
+
     localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
     document.getElementById('old-password').value = '';
     document.getElementById('new-password').value = '';
-    alert("✅ Votre mot de passe a été modifié avec succès !");
+    afficherMessage('password-message', 'Mot de passe mis à jour avec succès.', '#2e7d32');
+}
+
+// 4. ANNULATION PAR LE CLIENT
+function demanderAnnulation(resId) {
+    const motif = prompt("Indiquez la raison de votre annulation pour l'hôte :");
+    if (motif === null) return;
+
+    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+    reservations = reservations.map(r => {
+        if (r.id === resId) {
+            return {
+                ...r,
+                statut: 'annulee',
+                motifAnnulation: motif.trim() || 'Annulé par le client'
+            };
+        }
+        return r;
+    });
+
+    localStorage.setItem('reservations', JSON.stringify(reservations));
+    chargerProfilEtReservations();
+    alert("Votre demande d'annulation a été enregistrée.");
+}
+
+// 5. UPLOAD DE LA PHOTO DE PROFIL
+function gererChangementPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const base64Photo = evt.target.result;
+        const emailConnecte = recupererEmailActif();
+        let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
+
+        utilisateurs = utilisateurs.map(u => {
+            if ((u.email || '').trim().toLowerCase() === emailConnecte) {
+                return { ...u, photo: base64Photo };
+            }
+            return u;
+        });
+
+        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
+        chargerProfilEtReservations();
+    };
+    reader.readAsDataURL(file);
+}
+
+// 6. ENVOI DU LIEN DE VALIDATION EMAILJS
+function envoyerLienValidation() {
+    const emailConnecte = recupererEmailActif();
+    const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
+    const user = utilisateurs.find(u => (u.email || '').trim().toLowerCase() === emailConnecte);
+
+    if (!user) return;
+
+    const lienValidation = `${window.location.origin}/auth.html?action=valider&token=${user.tokenValidation || 'valid'}`;
+    const templateParams = {
+        name: user.nom,
+        email: user.email,
+        lien_validation: lienValidation
+    };
+
+    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
+        .then(() => {
+            alert("Lien de validation envoyé avec succès à " + user.email);
+        })
+        .catch(err => {
+            console.error("Erreur EmailJS:", err);
+            alert("Impossible d'envoyer l'e-mail. Vérifiez la configuration EmailJS.");
+        });
+}
+
+// 7. UTILITAIRES
+function afficherMessage(elementId, texte, couleur) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.textContent = texte;
+    el.style.color = couleur;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function deconnecter() {
+    localStorage.removeItem('utilisateurConnecte');
+    window.location.href = 'index.html';
 }

@@ -8,7 +8,12 @@
     --sans: 'Open Sans', sans-serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
 body {
     font-family: var(--sans);
     color: var(--dark);
@@ -16,13 +21,20 @@ body {
     background-color: var(--secondary);
     padding-top: 80px;
 }
-.container { width: 90%; max-width: 1100px; margin: 0 auto; }
 
-/* Navigation */
+.container { 
+    width: 90%; 
+    max-width: 1100px; 
+    margin: 0 auto; 
+}
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
 .navbar {
     background: white;
     padding: 1rem 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     position: fixed;
     width: 100%;
     top: 0;
@@ -30,54 +42,12 @@ body {
     transition: all 0.3s ease;
 }
 
-/* --- HARMONISATION DE LA NAVBAR CONNECTÉE --- */
-
-/* On aligne parfaitement le texte "Bienvenue" et les boutons */
-#nav-auth-container {
-    display: flex !important;
-    align-items: center;
-    gap: 15px;
-    height: 100%; /* S'assure de prendre toute la hauteur de la navbar */
+.nav-container { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
 }
 
-.nav-welcome {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin-right: 5px;
-}
-
-/* Le bouton "Mon Compte" devient vert et de taille standard */
-.btn-nav-small {
-    padding: 10px 20px !important; /* Taille augmentée pour la cohérence */
-    font-size: 0.9rem !important;
-    border-radius: 50px !important;
-    text-decoration: none;
-    font-weight: 600;
-    background-color: var(--primary) !important; /* Retour au vert forêt */
-    color: white !important;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.btn-nav-small:hover {
-    transform: translateY(-2px);
-    background-color: #5a6d3f !important;
-}
-
-/* Le bouton déconnexion reste discret mais aligné */
-.btn-logout-nav {
-    background-color: transparent !important;
-    border: 2px solid #c33 !important;
-    color: #c33 !important;
-}
-
-.btn-logout-nav:hover {
-    background-color: #fee !important;
-}
-
-
-.nav-container { display: flex; justify-content: space-between; align-items: center; }
 .logo {
     font-family: var(--serif);
     color: var(--primary);
@@ -89,6 +59,7 @@ body {
     gap: 10px;
     text-decoration: none;
 }
+
 .logo-icon {
     width: 40px;
     height: 40px;
@@ -96,13 +67,23 @@ body {
     align-items: center;
     justify-content: center;
 }
+
 .logo-icon svg {
     width: 100%;
     height: 100%;
     fill: var(--primary);
 }
-.nav-links { display: flex; list-style: none; align-items: center; }
-.nav-links li { margin-left: 2rem; }
+
+.nav-links { 
+    display: flex; 
+    list-style: none; 
+    align-items: center; 
+}
+
+.nav-links li { 
+    margin-left: 2rem; 
+}
+
 .nav-links a {
     text-decoration: none;
     color: var(--dark);
@@ -111,9 +92,66 @@ body {
     transition: color 0.3s ease;
     position: relative;
 }
-.nav-links a:hover { color: var(--primary); }
 
-/* Hero */
+.nav-links a:hover { 
+    color: var(--primary); 
+}
+
+/* Zone d'authentification dans la Navbar */
+#nav-auth-container,
+.nav-auth-wrapper {
+    display: flex !important;
+    align-items: center;
+    gap: 15px;
+    height: 100%;
+}
+
+.nav-welcome {
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-right: 5px;
+}
+
+.btn-nav-small {
+    padding: 8px 18px !important;
+    font-size: 0.85rem !important;
+    border-radius: 50px !important;
+    text-decoration: none;
+    font-weight: 600;
+    background-color: var(--primary) !important;
+    color: white !important;
+    display: inline-block;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.btn-nav-small:hover {
+    transform: translateY(-2px);
+    background-color: #5a6d3f !important;
+}
+
+.btn-logout-nav {
+    background: transparent !important;
+    border: 2px solid #c33 !important;
+    color: #c33 !important;
+    border-radius: 50px !important;
+    padding: 6px 14px !important;
+    font-size: 0.85rem !important;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+.btn-logout-nav:hover {
+    background: #fee !important;
+}
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
 .hero {
     height: 70vh;
     background: linear-gradient(135deg, rgba(106, 127, 78, 0.85), rgba(44, 62, 80, 0.85)),
@@ -126,7 +164,11 @@ body {
     position: relative;
     overflow: hidden;
 }
-.hero-content { animation: fadeInUp 0.8s ease; }
+
+.hero-content { 
+    animation: fadeInUp 0.8s ease; 
+}
+
 .hero-title {
     font-family: var(--serif);
     font-size: 3.5rem;
@@ -134,15 +176,24 @@ body {
     font-weight: 700;
     letter-spacing: -1px;
 }
+
 .hero-subtitle {
     font-size: 1.3rem;
     margin-bottom: 30px;
     font-weight: 300;
     opacity: 0.95;
 }
-.hero-btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
 
-/* Buttons */
+.hero-btns { 
+    display: flex; 
+    gap: 15px; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+}
+
+/* ==========================================================================
+   Boutons globaux
+   ========================================================================== */
 .btn {
     padding: 14px 32px;
     border-radius: 50px;
@@ -155,33 +206,47 @@ body {
     font-size: 1rem;
     box-shadow: 0 4px 15px rgba(106, 127, 78, 0.2);
 }
+
 .btn-nav, .btn-hero {
     background: var(--primary);
     color: white;
 }
+
 .btn-nav:hover, .btn-hero:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(106, 127, 78, 0.35);
     background: #5a6d3f;
 }
+
 .btn-outline {
     border: 2px solid white;
     color: white;
     background: transparent;
     margin-left: 10px;
 }
+
 .btn-outline:hover {
     background: white;
     color: var(--primary);
 }
 
-/* Sections */
+/* ==========================================================================
+   Sections & Titres
+   ========================================================================== */
 .section {
     padding: 80px 0;
     background: var(--secondary);
 }
-.section:nth-child(even) { background: var(--light-gray); }
-.section-header { margin-bottom: 50px; text-align: center; }
+
+.section:nth-child(even) { 
+    background: var(--light-gray); 
+}
+
+.section-header { 
+    margin-bottom: 50px; 
+    text-align: center; 
+}
+
 .section-subtitle {
     display: inline-block;
     font-size: 0.85rem;
@@ -191,6 +256,7 @@ body {
     letter-spacing: 2px;
     margin-bottom: 10px;
 }
+
 .section-title {
     font-family: var(--serif);
     font-size: 2.5rem;
@@ -200,32 +266,41 @@ body {
     font-weight: 700;
 }
 
-/* Gallery */
+/* ==========================================================================
+   Galerie
+   ========================================================================== */
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
     margin-bottom: 40px;
 }
+
 .gallery-card {
     background: white;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.4s ease;
     cursor: pointer;
 }
+
 .gallery-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
+
 .gallery-card img {
     width: 100%;
     height: 220px;
     object-fit: cover;
     transition: transform 0.4s ease;
 }
-.gallery-card:hover img { transform: scale(1.05); }
+
+.gallery-card:hover img { 
+    transform: scale(1.05); 
+}
+
 .gallery-card p {
     padding: 20px;
     font-weight: 600;
@@ -233,17 +308,21 @@ body {
     text-align: center;
 }
 
-/* Discovery Layout */
+/* ==========================================================================
+   Découverte
+   ========================================================================== */
 .discovery-layout {
     display: flex;
     gap: 60px;
     align-items: center;
     flex-wrap: wrap;
 }
+
 .discovery-text {
     flex: 1;
     min-width: 300px;
 }
+
 .discovery-text h4 {
     font-size: 1.3rem;
     margin-top: 25px;
@@ -251,49 +330,61 @@ body {
     color: var(--primary);
     font-family: var(--serif);
 }
+
 .discovery-text p {
     font-size: 1.05rem;
     margin-bottom: 15px;
     line-height: 1.8;
 }
+
 .discovery-img {
     flex: 1;
     min-width: 300px;
 }
+
 .discovery-img img {
     width: 100%;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
     transition: transform 0.4s ease;
 }
-.discovery-img:hover img { transform: scale(1.02); }
 
-/* Amenities */
+.discovery-img:hover img { 
+    transform: scale(1.02); 
+}
+
+/* ==========================================================================
+   Commodités (Amenities)
+   ========================================================================== */
 .amenities {
     background: white;
     padding: 40px;
     border-radius: 15px;
     border-left: 5px solid var(--primary);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
 }
+
 .amenities h4 {
     font-family: var(--serif);
     font-size: 1.4rem;
     margin-bottom: 20px;
     color: var(--primary);
 }
+
 .amenities-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     list-style: none;
 }
+
 .amenities-list li {
     padding: 12px 0;
     font-size: 1.05rem;
     font-weight: 500;
     color: var(--dark);
 }
+
 .amenities-list li:before {
     content: "✓ ";
     color: var(--primary);
@@ -301,21 +392,25 @@ body {
     margin-right: 10px;
 }
 
-/* Formulaire */
+/* ==========================================================================
+   Formulaire de réservation
+   ========================================================================== */
 .booking-form {
     max-width: 700px;
     margin: 0 auto;
     background: white;
     padding: 45px;
     border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
+
 .form-group {
     display: flex;
     gap: 15px;
     margin-bottom: 20px;
     flex-wrap: wrap;
 }
+
 input, textarea {
     width: 100%;
     padding: 14px 16px;
@@ -325,15 +420,18 @@ input, textarea {
     font-size: 1rem;
     transition: all 0.3s ease;
 }
+
 input:focus, textarea:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(106, 127, 78, 0.1);
 }
+
 .date-input {
     flex: 1;
     min-width: 200px;
 }
+
 .date-input label {
     font-size: 0.85rem;
     font-weight: 700;
@@ -344,7 +442,6 @@ input:focus, textarea:focus {
     letter-spacing: 0.5px;
 }
 
-/* Message d'erreur dates */
 #message-erreur-dates {
     background: #fee;
     border: 2px solid #c33;
@@ -355,6 +452,196 @@ input:focus, textarea:focus {
     font-weight: 600;
     text-align: center;
     animation: slideIn 0.3s ease;
+}
+
+/* ==========================================================================
+   Calendrier Interactif Moderne (Client / Admin)
+   ========================================================================== */
+.calendar-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    max-width: 700px;
+    margin: 0 auto 30px;
+}
+
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-nav h4 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    margin: 0;
+    text-transform: capitalize;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.calendar-nav button {
+    background: var(--light-gray);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--dark);
+    transition: background 0.2s;
+}
+
+.calendar-nav button:hover {
+    background: #e5e7eb;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--primary);
+    padding: 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(106, 127, 78, 0.08);
+    border-radius: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    position: relative;
+    user-select: none;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+/* Jours hors mois ou passés */
+.calendar-day.empty {
+    visibility: hidden;
+}
+
+.calendar-day.past {
+    color: #d1d5db;
+    background: #f9fafb;
+    cursor: not-allowed;
+}
+
+/* VERT : Disponible */
+.calendar-day.dispo {
+    background: #ecfdf5;
+    color: #065f46;
+    cursor: pointer;
+    border: 1px solid #a7f3d0;
+}
+
+.calendar-day.dispo:hover {
+    background: #10b981;
+    color: #ffffff;
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* ROUGE : Indisponible / Confirmé (ou en attente côté client) */
+.calendar-day.booked {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+/* ORANGE : Demande en cours (visible uniquement sur l'espace hôte/admin) */
+.calendar-day.pending {
+    background: #fffbeb;
+    color: #b45309;
+    border: 2px dashed #fcd34d;
+    cursor: not-allowed;
+}
+
+/* Sélection du séjour en cours par le client */
+.calendar-day.selected-start,
+.calendar-day.selected-end {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--primary) !important;
+    transform: scale(1.08);
+    box-shadow: 0 4px 14px rgba(106, 127, 78, 0.4);
+}
+
+.calendar-day.selected-range {
+    background: #eaf1e4 !important;
+    color: var(--primary) !important;
+    border: 1px solid #c9d8c0 !important;
+}
+
+/* Légende sous le calendrier */
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+}
+
+.legend-dispo { background: #10b981; }
+.legend-booked { background: #ef4444; }
+.legend-pending { background: #f59e0b; border: 1px dashed #d97706; }
+.legend-selected { background: var(--primary); }
+
+/* ==========================================================================
+   Footer, Utilitaires & Animations
+   ========================================================================== */
+footer {
+    text-align: center;
+    padding: 50px 20px;
+    font-size: 0.9rem;
+    color: #888;
+    background: var(--light-gray);
+    border-top: 1px solid #e0e0e0;
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: -0.125em;
+}
+
+.icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 0;
 }
 
 @keyframes slideIn {
@@ -368,17 +655,6 @@ input:focus, textarea:focus {
     }
 }
 
-/* Footer */
-footer {
-    text-align: center;
-    padding: 50px 20px;
-    font-size: 0.9rem;
-    color: #888;
-    background: var(--light-gray);
-    border-top: 1px solid #e0e0e0;
-}
-
-/* Animations */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -390,135 +666,9 @@ footer {
     }
 }
 
-/* Calendrier */
-.calendar-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-    margin-bottom: 40px;
-}
-
-.calendar-month {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    padding: 25px;
-    border: 1px solid #e8e8e8;
-}
-
-.calendar-header {
-    text-align: center;
-    margin-bottom: 25px;
-    border-bottom: 3px solid var(--primary);
-    padding-bottom: 15px;
-}
-
-.calendar-header h4 {
-    font-family: var(--serif);
-    font-size: 1.4rem;
-    color: var(--primary);
-    margin: 0;
-    text-transform: capitalize;
-    font-weight: 700;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-}
-
-.calendar-day-header {
-    text-align: center;
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: var(--primary);
-    padding: 12px 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: rgba(106, 127, 78, 0.05);
-    border-radius: 8px;
-}
-
-.calendar-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-    position: relative;
-}
-
-.calendar-day-other {
-    color: #ddd;
-    background: #fafafa;
-    cursor: default;
-}
-
-.calendar-day-past {
-    background: #e8e8e8;
-    color: #999;
-    cursor: default;
-    font-weight: 500;
-}
-
-.calendar-day-today {
-    background: #e3f2fd;
-    color: #1e40af;
-    border: 2px solid #3b82f6;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-}
-
-.calendar-day-available {
-    background: #f0fdf4;
-    color: var(--primary);
-    border: 2px solid #86efac;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.calendar-day-available:hover {
-    background: #dcfce7;
-    border-color: var(--primary);
-    transform: scale(1.08);
-    box-shadow: 0 4px 12px rgba(106, 127, 78, 0.3);
-}
-
-.calendar-day-available:active {
-    transform: scale(0.95);
-}
-
-.calendar-day-unavailable {
-    background: #fecaca;
-    color: #991b1b;
-    border: 2px solid #fca5a5;
-    cursor: not-allowed;
-    opacity: 0.8;
-    text-decoration: line-through;
-    font-weight: 500;
-}
-
-.calendar-day-selected {
-    background: var(--primary) !important;
-    color: white !important;
-    border: 2px solid var(--primary) !important;
-    box-shadow: 0 4px 14px rgba(106, 127, 78, 0.4) !important;
-    font-weight: 700 !important;
-}
-
-.calendar-day-range {
-    background: rgba(106, 127, 78, 0.2) !important;
-    color: var(--primary) !important;
-    border: 1px solid rgba(106, 127, 78, 0.3) !important;
-    font-weight: 600 !important;
-}
-
+/* ==========================================================================
+   Responsive Mobile
+   ========================================================================== */
 @media (max-width: 768px) {
     .hero-title { font-size: 2.2rem; }
     .section-title { font-size: 1.8rem; }
@@ -533,103 +683,193 @@ footer {
         right: 0;
         flex-direction: column !important;
         background: white;
-        padding: 10px;
+        padding: 15px;
         border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         width: auto;
-        gap: 5px !important;
+        gap: 8px !important;
     }
 
-    .calendar-container {
-        grid-template-columns: 1fr;
+    .calendar-wrapper {
+        padding: 16px;
     }
 
     .calendar-day {
         font-size: 0.85rem;
     }
 
-    .calendar-header h4 {
-        font-size: 1.2rem;
+    .calendar-nav h4 {
+        font-size: 1.1rem;
     }
 }
 
-/* Logo & Icons */
-.logo {
-    font-family: var(--serif);
+/* --- ESPACES COMMUNS --- */
+.common-space-card {
+    display: flex;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    margin-bottom: 50px;
+    border: 1px solid #eee;
+    flex-wrap: wrap;
+}
+
+.common-space-img {
+    flex: 1.2;
+    min-width: 320px;
+    max-height: 380px;
+}
+
+.common-space-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.common-space-info {
+    flex: 1;
+    min-width: 300px;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.room-tag {
+    display: inline-block;
+    align-self: flex-start;
+    background: #eef2ea;
     color: var(--primary);
-    font-size: 1.6rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-.logo-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.logo-icon svg {
-    width: 100%;
-    height: 100%;
-    fill: var(--primary);
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
 }
 
-/* Icon utilities */
-.icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.2em;
-    height: 1.2em;
-    vertical-align: -0.125em;
-}
-.icon svg {
-    width: 100%;
-    height: 100%;
-    fill: currentColor;
-    stroke: currentColor;
-    stroke-width: 0;
+.common-space-info h3 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    color: var(--dark);
+    margin-bottom: 15px;
 }
 
-/* Bouton déconnexion */
-.nav-links li span {
+.common-space-info p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.room-features {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-/* --- FIX NAVBAR CONNECTÉE --- */
-.nav-auth-wrapper {
-    display: flex !important; /* Force l'alignement horizontal */
-    align-items: center;
-    gap: 15px; /* Crée l'espace entre Bienvenue, Compte et Déconnexion */
-}
-
-.nav-welcome {
-    white-space: nowrap; /* Empêche le nom de revenir à la ligne */
-    font-size: 0.9rem;
+.room-features span {
+    background: var(--light-gray);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--dark);
 }
 
-.btn-nav-small {
-    padding: 8px 16px !important;
-    font-size: 0.8rem !important;
-    border-radius: 50px !important;
-    white-space: nowrap;
-    text-decoration: none;
+/* --- LOGEMENTS PRIVATIFS (5 SUITES) --- */
+.subsection-title {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 30px;
 }
 
-.btn-logout-nav {
-    background: transparent !important;
-    border: 1px solid #c33 !important;
-    color: #c33 !important;
-    box-shadow: none !important;
+.lodgings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
 }
 
-.btn-logout-nav:hover {
-    background: #fee !important;
+.lodging-card {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.lodging-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.lodging-img-wrapper {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+}
+
+.lodging-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.lodging-card:hover .lodging-img-wrapper img {
+    transform: scale(1.05);
+}
+
+.lodging-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(44, 62, 80, 0.85);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    font-weight: 600;
+}
+
+.lodging-content {
+    padding: 22px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.lodging-content h4 {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+
+.lodging-desc {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.lodging-amenities {
+    list-style: none;
+    margin-top: auto;
+    border-top: 1px dashed #eee;
+    padding-top: 12px;
+}
+
+.lodging-amenities li {
+    font-size: 0.85rem;
+    color: #444;
+    margin-bottom: 6px;
+    font-weight: 500;
 }

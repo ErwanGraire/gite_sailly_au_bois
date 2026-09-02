@@ -71,28 +71,33 @@
         </div>
 
         <div id="booking-section" style="display: none;">
-            <div id="disponibilites-info" style="text-align: center; margin-bottom: 30px; padding: 15px; background: #f0f9ff; border-radius: 10px; border-left: 4px solid #3b82f6;">
-                <p style="font-size: 0.95rem; color: #1e40af; margin: 0;">
-                    <strong>ℹ️ Légende du calendrier :</strong>
-                    <span style="display: inline-block; margin: 0 15px;">
-                        <span style="display: inline-block; width: 12px; height: 12px; background: #3c3; border-radius: 2px; margin-right: 5px; vertical-align: middle;"></span>
-                        Disponible
-                    </span>
-                    <span style="display: inline-block;">
-                        <span style="display: inline-block; width: 12px; height: 12px; background: #c33; border-radius: 2px; margin-right: 5px; vertical-align: middle;"></span>
-                        Réservé
-                    </span>
-                </p>
-            </div>
+            <!-- Conteneur du calendrier dynamique -->
+            <div id="calendar-container"></div>
 
-            <!-- Calendrier -->
-            <div id="calendar-container" class="calendar-container"></div>
+            <form action="https://formspree.io/f/mnjzyngz" method="POST" class="booking-form" id="form-reservation">
+                
+                <!-- Sélection de l'hébergement -->
+                <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+                    <label for="booking-logement" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--dark); margin-bottom: 8px;">
+                        Hébergement souhaité
+                    </label>
+                    <select id="booking-logement" name="logement" required style="width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: inherit; font-size: 1rem; background: white;">
+                        <option value="Domaine complet (5 logements)">Domaine complet (5 hébergements - Exclusivité)</option>
+                        <option value="La Bergerie">La Bergerie (Chambre + SDB privative)</option>
+                        <option value="L'Écurie">L'Écurie (Chambre + SDB privative)</option>
+                        <option value="L'Étable">L'Étable (Chambre + SDB privative)</option>
+                        <option value="Le Pigeonnier">Le Pigeonnier (Chambre + SDB privative)</option>
+                        <option value="Le Grenier">Le Grenier (Chambre + SDB privative)</option>
+                    </select>
+                </div>
 
-            <form action="https://formspree.io/f/mnjzyngz" method="POST" class="booking-form">
+                <!-- Identité du client -->
                 <div class="form-group">
                     <input type="text" name="nom" placeholder="Nom complet" required>
                     <input type="email" name="email" placeholder="Votre email" required>
                 </div>
+
+                <!-- Dates d'arrivée et de départ -->
                 <div class="form-group">
                     <div class="date-input">
                         <label for="date-arrivee">
@@ -117,16 +122,19 @@
                         <input type="date" id="date-depart" name="depart" required>
                     </div>
                 </div>
+
+                <!-- Précisions -->
                 <div class="form-group">
-                    <textarea name="message" rows="4" placeholder="Votre message, questions..." style="width: 100%;"></textarea>
+                    <textarea name="message" rows="4" placeholder="Votre message, nombre de personnes, questions particulières..." style="width: 100%;"></textarea>
                 </div>
+
                 <button type="submit" class="btn btn-hero" style="width: 100%;">
                     <span class="icon" style="margin-right: 8px;">
                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                         </svg>
                     </span>
-                    Envoyer ma demande
+                    Envoyer ma demande de réservation
                 </button>
             </form>
         </div>
@@ -134,7 +142,7 @@
 </section>
 
 <footer>
-    <p>&copy; 2024 Gîte de Sailly-au-Bois. Tous droits réservés.</p>
+    <p>&copy; 2026 Gîte de Sailly-au-Bois. Tous droits réservés.</p>
 </footer>
 
 <script src="auth-utils.js"></script>
