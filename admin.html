@@ -89,7 +89,33 @@
             outline: none;
         }
 
-        /* Tableau épuré */
+        /* Formulaire de blocage */
+        .form-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 15px; 
+            align-items: end;
+        }
+
+        .form-grid label {
+            display: block; 
+            font-size: 0.8rem; 
+            font-weight: 700; 
+            margin-bottom: 6px; 
+            color: #334155;
+        }
+
+        .form-grid input, .form-grid select {
+            width: 100%; 
+            padding: 9px 12px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            font-family: inherit;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+
+        /* Tableau */
         .table-responsive {
             overflow-x: auto;
         }
@@ -153,6 +179,7 @@
             display: flex;
             gap: 6px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn-action { 
@@ -175,6 +202,21 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.95); z-index: 2000;
             display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Modales */
+        .modal-overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.6); 
+            z-index: 3000; 
+            align-items: center; 
+            justify-content: center; 
+            backdrop-filter: blur(2px);
         }
     </style>
 </head>
@@ -208,13 +250,62 @@
 <div class="container admin-container">
     <h2 class="section-title" style="text-align: left; margin-bottom: 25px;">Tableau de bord propriétaire</h2>
 
-    <!-- CALENDRIER VISUEL -->
+    <!-- 1. PLANNING VISUEL DES HÉBERGEMENTS -->
     <div class="admin-section">
         <h3 style="margin-top:0; margin-bottom: 15px;">Planning visuel des hébergements</h3>
         <div id="calendar-container"></div>
     </div>
 
-    <!-- GESTION DES RÉSERVATIONS -->
+    <!-- 2. BLOCAGE MANUEL DE DATES (Airbnb, Téléphone, Travaux...) -->
+    <div class="admin-section">
+        <h3 style="margin-top:0; margin-bottom: 8px;">Bloquer des dates manuellement</h3>
+        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 20px;">
+            Indisponibilité immédiate sur le calendrier public (Airbnb, réservation téléphonique, travaux) sans envoi d'e-mail.
+        </p>
+
+        <form id="form-bloquer-dates" onsubmit="bloquerDatesManuel(event)" class="form-grid">
+            <div>
+                <label>Hébergement</label>
+                <select id="blocage-logement" required>
+                    <option value="Domaine complet">Domaine complet (tous)</option>
+                    <option value="La Bergerie">La Bergerie</option>
+                    <option value="L'Écurie">L'Écurie</option>
+                    <option value="L'Étable">L'Étable</option>
+                    <option value="Le Pigeonnier">Le Pigeonnier</option>
+                    <option value="Le Grenier">Le Grenier</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Date d'arrivée</label>
+                <input type="date" id="blocage-arrivee" required>
+            </div>
+
+            <div>
+                <label>Date de départ</label>
+                <input type="date" id="blocage-depart" required>
+            </div>
+
+            <div>
+                <label>Origine / Motif</label>
+                <select id="blocage-motif">
+                    <option value="Airbnb">Réservation Airbnb</option>
+                    <option value="Booking.com">Booking.com</option>
+                    <option value="Téléphone">Réservation par téléphone</option>
+                    <option value="Indisponibilité">Indisponibilité propriétaire</option>
+                    <option value="Travaux">Travaux / Entretien</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" class="btn-action" style="width: 100%; padding: 11px; background: #0f172a; color: white;">
+                    Bloquer le créneau
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 3. GESTION DES RÉSERVATIONS -->
     <div class="admin-section">
         <div class="toolbar">
             <!-- Onglets d'état -->
@@ -223,7 +314,7 @@
                     À traiter <span class="count" id="count-attente">0</span>
                 </button>
                 <button class="tab-btn" data-status="confirmee" onclick="changerOngletStatut('confirmee')">
-                    Validées <span class="count" id="count-validees">0</span>
+                    Validées / Bloquées <span class="count" id="count-validees">0</span>
                 </button>
                 <button class="tab-btn" data-status="annulee" onclick="changerOngletStatut('annulee')">
                     Annulées <span class="count" id="count-annulees">0</span>
@@ -251,10 +342,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Client</th>
+                        <th>Client / Origine</th>
                         <th>Hébergement</th>
                         <th>Dates du séjour</th>
-                        <th>Remarque client</th>
+                        <th>Remarque & Infos</th>
                         <th>Statut</th>
                         <th>Actions</th>
                     </tr>
@@ -264,7 +355,7 @@
         </div>
     </div>
 
-    <!-- UTILISATEURS INSCRITS -->
+    <!-- 4. UTILISATEURS INSCRITS -->
     <div class="admin-section">
         <h3 style="margin-top:0; margin-bottom: 15px;">Clients enregistrés</h3>
         <div class="table-responsive">
@@ -281,6 +372,83 @@
                 <tbody id="admin-users-body"></tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- 5. MODALE D'ÉDITION DES INFOS CLIENT / BLOCAGE -->
+<div id="modal-edit-reservation" class="modal-overlay">
+    <div style="background: white; border-radius: 16px; width: 92%; max-width: 520px; padding: 26px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 style="margin: 0; font-size: 1.15rem; color: #0f172a;">Modifier les détails du séjour</h3>
+            <button onclick="fermerModalEdition()" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer;">✕</button>
+        </div>
+
+        <form id="form-edit-details" onsubmit="sauvegarderDetailsEdition(event)">
+            <input type="hidden" id="edit-res-id">
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Nom du client / Voyageur</label>
+                <input type="text" id="edit-res-nom" placeholder="Ex: Jean Dupont (Airbnb)" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Téléphone</label>
+                    <input type="tel" id="edit-res-tel" placeholder="06 12 34 56 78" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Email (optionnel)</label>
+                    <input type="email" id="edit-res-email" placeholder="client@email.com" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Notes & Informations complémentaires</label>
+                <textarea id="edit-res-notes" rows="4" placeholder="Arrivée tardive 20h, lit bébé à préparer, code de la boîte à clés transmis, acompte réglé..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="fermerModalEdition()" class="btn-action btn-suppr" style="padding: 9px 16px;">Annuler</button>
+                <button type="submit" class="btn-action btn-valider" style="padding: 9px 18px;">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 6. MODALE DE REFUS / ANNULATION AVEC MOTIF (Anti-missclick & Explications) -->
+<div id="modal-refus-reservation" class="modal-overlay">
+    <div style="background: white; border-radius: 16px; width: 92%; max-width: 480px; padding: 26px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h3 style="margin: 0; font-size: 1.15rem; color: #b91c1c;">Refuser / Annuler le séjour</h3>
+            <button onclick="fermerModalRefus()" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer;">✕</button>
+        </div>
+
+        <p id="refus-recap-text" style="font-size: 0.88rem; color: #475569; margin-bottom: 16px; background: #fef2f2; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #dc2626;"></p>
+
+        <form id="form-refus-details" onsubmit="confirmerRefusReservation(event)">
+            <input type="hidden" id="refus-res-id">
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Raison principale</label>
+                <select id="refus-select-motif" onchange="changerMotifPredefini(this.value)" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+                    <option value="Hébergement déjà réservé / Indisponible">Hébergement déjà réservé / Indisponible</option>
+                    <option value="Nombre de personnes inadapté pour cet hébergement">Capacité / Nombre de personnes inadapté</option>
+                    <option value="Durée de séjour non conforme au minimum requis">Durée de séjour non conforme</option>
+                    <option value="Indisponibilité exceptionnelle ou travaux de maintenance">Indisponibilité exceptionnelle / Travaux</option>
+                    <option value="autre">Autre motif personnalisé...</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Message explicatif (visible par le client)</label>
+                <textarea id="refus-message-client" rows="3" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;" placeholder="Expliquez la raison du refus..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="fermerModalRefus()" class="btn-action btn-suppr" style="padding: 9px 16px;">Conserver la demande</button>
+                <button type="submit" class="btn-action btn-refuser" style="padding: 9px 18px;">Confirmer l'annulation</button>
+            </div>
+        </form>
     </div>
 </div>
 
