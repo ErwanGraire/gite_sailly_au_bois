@@ -91,8 +91,8 @@
         }
         .modal-specs-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
             background: var(--light-gray);
             padding: 15px 20px;
             border-radius: 12px;
@@ -140,7 +140,6 @@
             font-size: 0.85rem;
             color: var(--primary);
             font-weight: 700;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -177,7 +176,7 @@
 
         <div class="common-space-card clickable-card" onclick="ouvrirFicheLogement('communes')">
             <div class="common-space-img">
-                <img src="images/parties-communes/sejour.jpg" onerror="this.src='https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000'" alt="Grande cuisine et séjour commun">
+                <img src="photo_gite/parties communes/sejour.jpg" onerror="this.src='https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000'" alt="Grande cuisine et séjour commun">
             </div>
             <div class="common-space-info">
                 <span class="room-tag">Espace Partagé</span>
@@ -191,107 +190,168 @@
                     <span>🛋️ Salon convivial</span>
                     <span>☕ Cafetières & Thé</span>
                 </div>
-                <div class="card-click-hint">Explorer les photos et équipements de la pièce &rarr;</div>
+                <div class="card-click-hint" style="margin-top: 15px;">Explorer les photos et équipements de la pièce &rarr;</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- LES 5 LOGEMENTS (CLIC POUR MODALE) -->
+<!-- LES 5 LOGEMENTS & DOMAINE COMPLET -->
 <section class="section" style="background: white;">
     <div class="container">
         <div class="section-header">
             <span class="section-subtitle">Chambre & Salle de bain</span>
             <h3 class="section-title">Les 5 Hébergements</h3>
             <p style="max-width: 650px; margin: 0 auto; color: #666;">
-                Chacun dispose de sa salle de bain intégrée pour préserver l'intimité et le rythme de chacun.
+                Chaque suite dispose de sa propre salle de bain pour préserver l'intimité de chacun.
             </p>
         </div>
 
+        <!-- BANNIÈRE DOMAINE COMPLET -->
+        <div class="domaine-complet-card">
+            <div style="max-width: 620px;">
+                <span class="domaine-badge">✨ Exclusivité & Privatisation</span>
+                <h3 style="margin: 0 0 10px 0; font-family: var(--serif); font-size: 1.6rem; color: #fff;">
+                    Privatisation du Domaine complet
+                </h3>
+                <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; margin-bottom: 14px;">
+                    Réservez l'intégralité du corps de ferme (les 5 hébergements : La Bergerie, L'Écurie, L'Étable, Le Pigeonnier et Le Grenier). Idéal pour les réunions de famille, mariages ou séjours au vert entre amis.
+                </p>
+                <div style="font-size: 0.85rem; color: #94a3b8; display: flex; gap: 18px; flex-wrap: wrap;">
+                    <span>👥 Jusqu'à 15 personnes</span>
+                    <span>🏡 5 hébergements indépendants</span>
+                    <span>🌳 Cour & Jardin privatifs</span>
+                </div>
+            </div>
+
+            <div class="domaine-price-box">
+                <div class="domaine-price">
+                    450 € <span>/ nuit</span>
+                </div>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 16px 0;">
+                    Minimum 2 nuits le week-end
+                </p>
+                <a href="index.html?logement=domaine#reserver" class="btn btn-hero" style="display: block; text-align: center; width: 100%; background: var(--primary); padding: 11px 18px;">
+                    Réserver tout le domaine
+                </a>
+            </div>
+        </div>
+
+        <!-- GRILLE DES 5 HÉBERGEMENTS -->
         <div class="lodgings-grid">
 
             <!-- 1. La Bergerie -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('bergerie')">
                 <div class="lodging-img-wrapper">
-                    <img src="images/Photos Bergerie/chambre.jpg" onerror="this.src='https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=600'" alt="La Bergerie">
+                    <img src="photo_gite/Photos Bergerie/IMG_9504.jpeg" onerror="this.src='https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=600'" alt="La Bergerie">
                 </div>
                 <div class="lodging-content">
-                    <h4>La Bergerie</h4>
+                    <div class="card-header-price">
+                        <h4>La Bergerie</h4>
+                        <div class="price-tag">85 € <span>/ nuit</span></div>
+                    </div>
                     <p class="lodging-desc">Atmosphère sereine aux tons naturels, touches de bois et pierre ancienne.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~24 m² &bull; Orientation Est (Soleil du matin)</li>
                         <li>🛏️ Chambre lit double 160x200</li>
                         <li>🚿 Salle de bain privative douche & vasque</li>
                     </ul>
-                    <span class="card-click-hint">Voir les photos & détails &rarr;</span>
+                    <div class="lodging-actions">
+                        <span class="card-click-hint">Voir détails &rarr;</span>
+                        <a href="index.html?logement=bergerie#reserver" class="btn-book-small" onclick="event.stopPropagation()">Réserver</a>
+                    </div>
                 </div>
             </article>
 
             <!-- 2. L'Écurie -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('ecurie')">
                 <div class="lodging-img-wrapper">
-                    <img src="images/Photos Ecurie/chambre.jpg" onerror="this.src='https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=600'" alt="L'Écurie">
+                    <img src="photo_gite/Photos Ecurie/IMG_9517.jpeg" onerror="this.src='https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=600'" alt="L'Écurie">
                 </div>
                 <div class="lodging-content">
-                    <h4>L'Écurie</h4>
+                    <div class="card-header-price">
+                        <h4>L'Écurie</h4>
+                        <div class="price-tag">90 € <span>/ nuit</span></div>
+                    </div>
                     <p class="lodging-desc">Spacieuse et chaleureuse, grand confort avec salle d'eau contemporaine.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~26 m² &bull; Orientation Sud (Très lumineux)</li>
                         <li>🛏️ Lit Queen-size confort hôtelier</li>
                         <li>🚿 Salle de bain avec douche à l'italienne</li>
                     </ul>
-                    <span class="card-click-hint">Voir les photos & détails &rarr;</span>
+                    <div class="lodging-actions">
+                        <span class="card-click-hint">Voir détails &rarr;</span>
+                        <a href="index.html?logement=ecurie#reserver" class="btn-book-small" onclick="event.stopPropagation()">Réserver</a>
+                    </div>
                 </div>
             </article>
 
             <!-- 3. L'Étable -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('etable')">
                 <div class="lodging-img-wrapper">
-                    <img src="images/Photos Etable/chambre.jpg" onerror="this.src='https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600'" alt="L'Étable">
+                    <img src="photo_gite/Photos Etable/IMG-20260808-WA0001.jpg" onerror="this.src='https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=600'" alt="L'Étable">
                 </div>
                 <div class="lodging-content">
-                    <h4>L'Étable</h4>
+                    <div class="card-header-price">
+                        <h4>L'Étable</h4>
+                        <div class="price-tag">85 € <span>/ nuit</span></div>
+                    </div>
                     <p class="lodging-desc">Un hébergement calme avec de beaux volumes et une vue apaisante.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~25 m² &bull; Orientation Ouest (Soleil couchant)</li>
                         <li>🛏️ Chambre lit double</li>
                         <li>🚿 Salle d'eau privative avec WC séparé</li>
                     </ul>
-                    <span class="card-click-hint">Voir les photos & détails &rarr;</span>
+                    <div class="lodging-actions">
+                        <span class="card-click-hint">Voir détails &rarr;</span>
+                        <a href="index.html?logement=etable#reserver" class="btn-book-small" onclick="event.stopPropagation()">Réserver</a>
+                    </div>
                 </div>
             </article>
 
             <!-- 4. Le Pigeonnier -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('pigeonnier')">
                 <div class="lodging-img-wrapper">
-                    <img src="images/pigeonnier/chambre.jpg" onerror="this.src='https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600'" alt="Le Pigeonnier">
+                    <img src="photo_gite/pigeonnier/pigeonnier2.JPG" onerror="this.src='https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600'" alt="Le Pigeonnier">
                 </div>
                 <div class="lodging-content">
-                    <h4>Le Pigeonnier</h4>
+                    <div class="card-header-price">
+                        <h4>Le Pigeonnier</h4>
+                        <div class="price-tag">95 € <span>/ nuit</span></div>
+                    </div>
                     <p class="lodging-desc">Le charme d'une architecture unique et d'une belle hauteur sous plafond.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~28 m² en duplex &bull; Orientation Sud-Est</li>
                         <li>🛏️ Espace nuit en mezzanine</li>
                         <li>🚿 Salle de bain privative au rez-de-chaussée</li>
                     </ul>
-                    <span class="card-click-hint">Voir les photos & détails &rarr;</span>
+                    <div class="lodging-actions">
+                        <span class="card-click-hint">Voir détails &rarr;</span>
+                        <a href="index.html?logement=pigeonnier#reserver" class="btn-book-small" onclick="event.stopPropagation()">Réserver</a>
+                    </div>
                 </div>
             </article>
 
             <!-- 5. Le Grenier -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('grenier')">
                 <div class="lodging-img-wrapper">
-                    <img src="images/grenier/chambre.jpg" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600'" alt="Le Grenier">
+                    <img src="photo_gite/grenier/grenier.JPG" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600'" alt="Le Grenier">
                 </div>
                 <div class="lodging-content">
-                    <h4>Le Grenier</h4>
+                    <div class="card-header-price">
+                        <h4>Le Grenier</h4>
+                        <div class="price-tag">110 € <span>/ nuit</span></div>
+                    </div>
                     <p class="lodging-desc">Sous la charpente apparente pour une ambiance cocon chaleureuse.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~27 m² mansardés &bull; Traversant Est/Ouest</li>
                         <li>🛏️ Chambre spacieuse sous combles</li>
                         <li>🚿 Salle d'eau intégrée sous les poutres</li>
                     </ul>
-                    <span class="card-click-hint">Voir les photos & détails &rarr;</span>
+                    <div class="lodging-actions">
+                        <span class="card-click-hint">Voir détails &rarr;</span>
+                        <a href="index.html?logement=grenier#reserver" class="btn-book-small" onclick="event.stopPropagation()">Réserver</a>
+                    </div>
                 </div>
             </article>
 
@@ -307,8 +367,12 @@
         <div id="modal-miniatures" class="modal-thumbnails"></div>
 
         <div class="modal-body">
-            <h3 id="modal-titre" style="font-family: var(--serif); font-size: 1.8rem; color: var(--dark); margin-bottom: 8px;"></h3>
-            <p id="modal-description" style="color: #666; font-size: 1rem; line-height: 1.6;"></p>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
+                <h3 id="modal-titre" style="font-family: var(--serif); font-size: 1.8rem; color: var(--dark); margin: 0 0 8px 0;"></h3>
+                <div id="modal-prix" style="font-size: 1.3rem; font-weight: 700; color: var(--primary);"></div>
+            </div>
+            
+            <p id="modal-description" style="color: #666; font-size: 1rem; line-height: 1.6; margin-top: 10px;"></p>
 
             <div class="modal-specs-bar">
                 <div class="spec-item">
@@ -331,9 +395,79 @@
 
             <h4 style="font-family: var(--serif); color: var(--primary); margin-top: 20px; font-size: 1.2rem;">Équipements inclus</h4>
             <ul id="modal-liste-equipements" class="modal-features-list"></ul>
+            
+            <div style="margin-top: 25px; text-align: right; border-top: 1px solid #eee; padding-top: 18px;">
+                <a id="modal-btn-reserver" href="index.html#reserver" class="btn btn-hero" style="font-size: 0.95rem; padding: 10px 24px;">Réserver cet hébergement</a>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- LOCALISATION & CARTE DU GÎTE -->
+<section class="section" style="background: var(--light-gray);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Localisation</span>
+            <h2 class="section-title">Où nous trouver ?</h2>
+            <p style="max-width: 650px; margin: 0 auto; color: #666; font-size: 0.95rem;">
+                Le gîte est situé au calme, en plein cœur du village de Sailly-au-Bois, facilement accessible depuis Arras, Albert et Amiens.
+            </p>
+        </div>
+
+        <div class="location-card">
+            <!-- Informations d'accès -->
+            <div class="location-info">
+                <span class="location-badge">📍 Adresse exacte</span>
+                <h3>Gîte de Sailly-au-Bois</h3>
+                <p class="location-address">
+                    <strong>2 rue Saint-Jean</strong><br>
+                    62111 Sailly-au-Bois<br>
+                    Hauts-de-France, France
+                </p>
+
+                <div class="location-details">
+                    <div class="location-detail-item">
+                        <span class="loc-icon">🚗</span>
+                        <div>
+                            <strong>Accès & Parking</strong>
+                            <p>Stationnement gratuit et sécurisé dans la cour intérieure du corps de ferme.</p>
+                        </div>
+                    </div>
+                    <div class="location-detail-item">
+                        <span class="loc-icon">⏱️</span>
+                        <div>
+                            <strong>Temps de trajet</strong>
+                            <p>20 min d'Albert • 25 min d'Arras • 45 min d'Amiens • 1h de Lille.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton d'itinéraire GPS calé sur 50.121301, 2.595008 -->
+                <a href="https://www.google.com/maps/dir/?api=1&destination=50.121301,2.595008" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="btn btn-hero" 
+                   style="display: inline-block; text-align: center; margin-top: 20px; padding: 12px 24px;">
+                    Ouvrir dans Google Maps →
+                </a>
+            </div>
+
+            <!-- Carte interactive centrée pile sur vos coordonnées -->
+            <div class="location-map-wrapper">
+                <iframe 
+                    title="Carte Sailly-au-Bois"
+                    src="https://www.google.com/maps?q=50.121301,2.595008&hl=fr&z=18&output=embed" 
+                    width="100%" 
+                    height="100%" 
+                    style="border: 0; min-height: 380px;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</section>
 
 <section class="section" style="text-align: center;">
     <div class="container">
@@ -341,7 +475,7 @@
         <p style="font-size: 1.1rem; margin-bottom: 30px; color: #555;">
             Réservez le domaine complet pour votre groupe et profitez de l'ensemble des 5 logements.
         </p>
-        <a href="index.html#reserver" class="btn btn-hero">Consulter les disponibilités</a>
+        <a href="index.html?logement=domaine#reserver" class="btn btn-hero">Consulter les disponibilités</a>
     </div>
 </section>
 
@@ -353,19 +487,17 @@
 
 <script src="auth-utils.js"></script>
 <script>
-// Données détaillées pour chaque hébergement (photos, m², orientation, etc.)
 const logementsData = {
     communes: {
         titre: "Espaces Communs & Cuisine Ouverte",
+        prix: "Inclus",
         description: "Un vaste espace pensé pour rassembler petits et grands autour de bons moments. La cuisine est entièrement aménagée avec tout le nécessaire pour cuisiner en nombre, et la salle à manger offre une grande tablée commune.",
         surface: "~65 m²",
         orientation: "Sud / Ouest",
         couchage: "Espace commun",
         sdbType: "WC indépendant",
         images: [
-            "images/parties-communes/sejour.jpg",
-            "images/parties-communes/cuisine.jpg",
-            "images/parties-communes/table.jpg"
+            "photo_gite/parties communes/sejour.jpg"
         ],
         equipements: [
             "🍳 Four de cuisson grande capacité",
@@ -380,15 +512,17 @@ const logementsData = {
     },
     bergerie: {
         titre: "Hébergement La Bergerie",
+        prix: "85 € / nuit",
         description: "Une atmosphère douce et apaisante avec ses éléments de bois brut et ses pierres blanches de taille. Une chambre intimiste avec sa propre salle d'eau attenante.",
         surface: "24 m²",
-        orientation: "Est (Soleil du matin)",
+        orientation: "Est (Matin)",
         couchage: "1 Lit double (160x200)",
         sdbType: "Privative (Douche)",
         images: [
-            "images/Photos Bergerie/chambre.jpg",
-            "images/Photos Bergerie/sdb.jpg",
-            "images/Photos Bergerie/details.jpg"
+            "photo_gite/Photos Bergerie/IMG_9504.jpeg",
+            "photo_gite/Photos Bergerie/IMG_9505.jpeg",
+            "photo_gite/Photos Bergerie/IMG_9506.jpeg",
+            "photo_gite/Photos Bergerie/IMG_9506 (1).jpeg"
         ],
         equipements: [
             "🛏️ Literie hôtelière haut de gamme",
@@ -401,15 +535,16 @@ const logementsData = {
     },
     ecurie: {
         titre: "Hébergement L'Écurie",
+        prix: "90 € / nuit",
         description: "Une chambre baignée de lumière naturelle tout au long de la journée grâce à son orientation plein Sud. Moderne et épurée tout en gardant l'âme de la propriété.",
         surface: "26 m²",
-        orientation: "Plein Sud (Lumière zénithale)",
-        couchage: "1 Lit double (160x200)",
+        orientation: "Plein Sud",
+        couchage: "1 Lit Queen-size (160x200)",
         sdbType: "Privative (Douche)",
         images: [
-            "images/Photos Ecurie/chambre.jpg",
-            "images/Photos Ecurie/sdb.jpg",
-            "images/Photos Ecurie/details.jpg"
+            "photo_gite/Photos Ecurie/IMG_9517.jpeg",
+            "photo_gite/Photos Ecurie/IMG_9520.jpeg",
+            "photo_gite/Photos Ecurie/IMG_9521.jpeg"
         ],
         equipements: [
             "🛏️ Matelas mémoire de forme",
@@ -422,15 +557,20 @@ const logementsData = {
     },
     etable: {
         titre: "Hébergement L'Étable",
+        prix: "85 € / nuit",
         description: "De très beaux volumes pour ce logement reposant situé au calme. Il profite de la douce lumière du soleil couchant en fin de journée.",
         surface: "25 m²",
-        orientation: "Ouest (Soleil couchant)",
+        orientation: "Ouest (Couchant)",
         couchage: "1 Lit double (160x200)",
         sdbType: "Privative (Douche & WC)",
         images: [
-            "images/Photos Etable/chambre.jpg",
-            "images/Photos Etable/sdb.jpg",
-            "images/Photos Etable/details.jpg"
+            "photo_gite/Photos Etable/IMG-20260808-WA0001.jpg",
+            "photo_gite/Photos Etable/IMG-20260808-WA0004.jpg",
+            "photo_gite/Photos Etable/IMG-20260808-WA0005.jpg",
+            "photo_gite/Photos Etable/IMG-20260808-WA0006 (1).jpg",
+            "photo_gite/Photos Etable/IMG-20260808-WA0008.jpg",
+            "photo_gite/Photos Etable/motion_photo_5665060291320810503.jpg",
+            "photo_gite/Photos Etable/motion_photo_6994553002501480880.jpg"
         ],
         equipements: [
             "🛏️ Grand lit confort hôtelier",
@@ -443,15 +583,18 @@ const logementsData = {
     },
     pigeonnier: {
         titre: "Hébergement Le Pigeonnier",
+        prix: "95 € / nuit",
         description: "La chambre la plus singulière du domaine : aménagée sur deux niveaux dans la tour de l'ancien pigeonnier, avec une hauteur impressionnante et une architecture conservée.",
         surface: "28 m² (Duplex)",
         orientation: "Sud-Est",
         couchage: "1 Lit double en mezzanine",
         sdbType: "Privative en RDC",
         images: [
-            "images/pigeonnier/chambre.jpg",
-            "images/pigeonnier/sdb.jpg",
-            "images/pigeonnier/details.jpg"
+            "photo_gite/pigeonnier/pigeonnier2.JPG",
+            "photo_gite/pigeonnier/pigeonnier3.JPG",
+            "photo_gite/pigeonnier/pigeonnier4.JPG",
+            "photo_gite/pigeonnier/pigeonnier5.JPG",
+            "photo_gite/pigeonnier/SdB pigeonnier.JPG"
         ],
         equipements: [
             "🕊️ Charme architectural unique",
@@ -464,15 +607,16 @@ const logementsData = {
     },
     grenier: {
         titre: "Hébergement Le Grenier",
+        prix: "110 € / nuit",
         description: "Ambiance chaleureuse et intimiste nichée sous la toiture, avec une superbe charpente d'époque mise en valeur par un éclairage indirect.",
         surface: "27 m² au sol",
         orientation: "Traversant Est/Ouest",
         couchage: "1 Lit double (160x200)",
         sdbType: "Privative intégrée",
         images: [
-            "images/grenier/chambre.jpg",
-            "images/grenier/sdb.jpg",
-            "images/grenier/details.jpg"
+            "photo_gite/grenier/grenier.JPG",
+            "photo_gite/grenier/grenier2.JPG",
+            "photo_gite/grenier/SdB grenier.JPG"
         ],
         equipements: [
             "🪵 Magnifique charpente et poutres apparentes",
@@ -490,18 +634,27 @@ function ouvrirFicheLogement(id) {
     if (!data) return;
 
     document.getElementById('modal-titre').textContent = data.titre;
+    document.getElementById('modal-prix').textContent = data.prix || '';
     document.getElementById('modal-description').textContent = data.description;
     document.getElementById('modal-surface').textContent = data.surface;
     document.getElementById('modal-orientation').textContent = data.orientation;
     document.getElementById('modal-couchage').textContent = data.couchage;
     document.getElementById('modal-sdb-type').textContent = data.sdbType;
 
-    // Image principale
+    // Lien réservation dynamique
+    const btnReserverModal = document.getElementById('modal-btn-reserver');
+    if (btnReserverModal) {
+        if (id === 'communes') {
+            btnReserverModal.href = 'index.html?logement=domaine#reserver';
+        } else {
+            btnReserverModal.href = `index.html?logement=${id}#reserver`;
+        }
+    }
+
     const mainImg = document.getElementById('modal-img-principale');
     mainImg.src = data.images[0];
     mainImg.onerror = () => { mainImg.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=1000'; };
 
-    // Miniatures cliquables
     const thumbsContainer = document.getElementById('modal-miniatures');
     thumbsContainer.innerHTML = '';
     data.images.forEach((imgUrl, index) => {
@@ -517,13 +670,11 @@ function ouvrirFicheLogement(id) {
         thumbsContainer.appendChild(thumb);
     });
 
-    // Équipements
     const equipList = document.getElementById('modal-liste-equipements');
     equipList.innerHTML = data.equipements.map(e => `<li>${e}</li>`).join('');
 
-    // Afficher la modale
     document.getElementById('modal-logement').style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Empêche le défilement de fond
+    document.body.style.overflow = 'hidden';
 }
 
 function fermerModal() {

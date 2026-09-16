@@ -12,7 +12,42 @@ window.addEventListener('scroll', function() {
 
 let reservationsData = [];
 
-// Charger les réservations (fichier + localStorage)
+// 1. PRÉ-SÉLECTION DYNAMIQUE DEPUIS L'URL (depuis gite.html)
+function preselectionnerLogementDepuisURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const logementParam = urlParams.get('logement');
+    if (!logementParam) return;
+
+    const selectEl = document.getElementById('booking-logement') || document.querySelector('select[name="logement"]');
+    if (!selectEl) return;
+
+    // Correspondance entre les slugs de gite.html et les options du select
+    const correspondances = {
+        'domaine': 'Domaine complet',
+        'communes': 'Domaine complet',
+        'bergerie': 'La Bergerie',
+        'ecurie': "L'Écurie",
+        'etable': "L'Étable",
+        'pigeonnier': 'Le Pigeonnier',
+        'grenier': 'Le Grenier'
+    };
+
+    const cleCible = correspondances[logementParam.toLowerCase()] || logementParam.toLowerCase();
+
+    for (let i = 0; i < selectEl.options.length; i++) {
+        const texteOption = selectEl.options[i].text.toLowerCase();
+        const valeurOption = selectEl.options[i].value.toLowerCase();
+
+        if (texteOption.includes(cleCible.toLowerCase()) || valeurOption.includes(cleCible.toLowerCase())) {
+            selectEl.selectedIndex = i;
+            // Déclenche l'événement change pour forcer la mise à jour des disponibilités
+            selectEl.dispatchEvent(new Event('change'));
+            break;
+        }
+    }
+}
+
+// 2. CHARGER LES RÉSERVATIONS (fichier + localStorage)
 async function chargerReservations() {
     try {
         const response = await fetch('reservations.json');
@@ -182,15 +217,18 @@ function afficherSucces(message) {
     cacherErreur();
 }
 
-// Initialisation au chargement
+// 3. INITIALISATION GLOBALE
 document.addEventListener('DOMContentLoaded', function() {
+    // A. Pré-sélection depuis l'URL si on arrive de gite.html
+    preselectionnerLogementDepuisURL();
+
+    // B. Chargement des réservations
     chargerReservations();
 
-    // Changement de logement dynamique
+    // C. Changement de logement dynamique
     const selectLogement = document.querySelector('select[name="logement"]') || document.getElementById('booking-logement');
     if (selectLogement) {
         selectLogement.addEventListener('change', function() {
-            // Effacer la sélection actuelle lors d'un changement de logement
             const inputArrivee = document.querySelector('input[name="arrivee"]');
             const inputDepart = document.querySelector('input[name="depart"]');
             if (inputArrivee) inputArrivee.value = '';
@@ -201,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Gestion du formulaire de réservation
+    // D. Gestion du formulaire de réservation
     const form = document.querySelector('.booking-form');
     if (form) {
         form.addEventListener('submit', function(e) {

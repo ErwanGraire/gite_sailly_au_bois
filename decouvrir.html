@@ -3,11 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Découvrir Sailly-au-Bois | Histoire & Nature</title>
+    <title>Découvrir la Région | Gîte de Sailly-au-Bois</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .guide-hero {
+            height: 48vh;
+            background: linear-gradient(rgba(44, 62, 80, 0.75), rgba(106, 127, 78, 0.75)),
+                        url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1200') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .guide-section {
+            padding: 60px 0;
+        }
+
+        .guide-section:nth-child(even) {
+            background: var(--light-gray);
+        }
+
+        .intro-box {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .spot-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .spot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+
+        .spot-img-box {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .spot-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .spot-card:hover .spot-img-box img {
+            transform: scale(1.05);
+        }
+
+        .spot-dist-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            color: white;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .spot-content {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .spot-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .spot-content h4 {
+            font-family: var(--serif);
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .spot-content p {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.55;
+            margin-bottom: 15px;
+        }
+
+        .spot-footer {
+            margin-top: auto;
+            border-top: 1px dashed #eee;
+            padding-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .spot-link {
+            color: var(--primary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .spot-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
+
 <nav class="navbar">
     <div class="container nav-container">
         <a href="index.html" class="logo">
@@ -21,121 +161,345 @@
         <ul class="nav-links">
             <li><a href="index.html">Accueil</a></li>
             <li><a href="gite.html">Le Gîte</a></li>
-            <li><a href="decouvrir.html">Découvrir</a></li>
+            <li><a href="decouvrir.html" style="color: var(--primary);">Découvrir</a></li>
             <li id="nav-auth-container" style="display: flex; align-items: center; gap: 15px;"></li>
         </ul>
     </div>
 </nav>
 
-<section class="section">
+<!-- BANNIÈRE HERO -->
+<header class="guide-hero">
     <div class="container">
-        <div class="section-header">
-            <span class="section-subtitle">Explorez</span>
-            <h2 class="section-title">Au cœur des Hauts-de-France</h2>
-        </div>
-        <div class="discovery-layout">
-            <div class="discovery-text">
-                <h4>
-                    <span class="icon" style="margin-right: 8px;">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
-                        </svg>
-                    </span>
-                    Un emplacement exceptionnel
-                </h4>
-                <p>Situé à la frontière du Pas-de-Calais et de la Somme, notre gîte bénéficie d'une position idéale, juste à côté de l'église Saint-Sulpice, joyau de la reconstruction locale.</p>
-
-                <h4>
-                    <span class="icon" style="margin-right: 8px;">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 6l-3.5 5 2.5 3.5-3.5-2-3.5 2 2.5-3.5-3.5-5 4-1 3.5-4 3.5 4 4 1z"/>
-                        </svg>
-                    </span>
-                    Un patrimoine vivant
-                </h4>
-                <p>Sailly-au-Bois a traversé l'histoire. Aujourd'hui, c'est un havre de paix idéal pour les passionnés d'histoire souhaitant explorer le <strong>Circuit du Souvenir</strong> (Thiepval, Beaumont-Hamel).</p>
-
-                <h4>
-                    <span class="icon" style="margin-right: 8px;">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 16c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-8-6c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0 6c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm8-12c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-6 6c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                        </svg>
-                    </span>
-                    Randonnées & Nature
-                </h4>
-                <p>Le <strong>Sentier des Coquelicots</strong> serpente à travers les plaines artésiennes et offre des paysages apaisants dès le pas de la porte.</p>
-            </div>
-            <div class="discovery-img">
-                <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800" alt="Nature Sailly">
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-subtitle">À proximité</span>
-            <h3 class="section-title">À découvrir dans la région</h3>
-        </div>
-        <div class="gallery-grid">
-            <div class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=600" alt="Histoire">
-                <p>
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 16l-8-4v-6l8 4 8-4v6l-8 4z"/>
-                        </svg>
-                    </span>
-                    Lieux historiques
-                </p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80&w=600" alt="Randos">
-                <p>
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13 5.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5-2.5 1.12-2.5 2.5 1.12 2.5 2.5 2.5zm-2 8.5h-8v-2h8v2zm8-6h-8v2h8v-2zm0 6h-8v2h8v-2z"/>
-                        </svg>
-                    </span>
-                    Sentiers de rando
-                </p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&q=80&w=600" alt="Gastronomie">
-                <p>
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7z"/>
-                        </svg>
-                    </span>
-                    Gastronomie locale
-                </p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1469022563149-aa64dbd37daf?auto=format&fit=crop&q=80&w=600" alt="Terroirs">
-                <p>
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.92 7.02C17.45 4.18 14.97 2 12 2c-2.97 0-5.45 2.18-5.92 5.02C4.97 7.55 3 9.88 3 12.5 3 16.04 5.96 19 9.5 19h8c3.04 0 5.5-2.46 5.5-5.5 0-2.62-1.97-4.95-4.58-5.48z"/>
-                        </svg>
-                    </span>
-                    Terroirs authentiques
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container" style="text-align: center;">
-        <h3 class="section-title">Prêt à explorer ?</h3>
-        <p style="font-size: 1.1rem; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Réservez votre séjour et découvrez les secrets des Hauts-de-France en toute sérénité.
+        <h1 style="font-family: var(--serif); font-size: 2.8rem; margin-bottom: 12px;">Terres d'Histoire & Campagne Préservée</h1>
+        <p style="font-size: 1.15rem; max-width: 650px; margin: 0 auto; opacity: 0.95;">
+            Aux confins de l'Artois et de la Somme, laissez-vous guider entre mémoire, patrimoine flamand et plaisirs de la table.
         </p>
-        <a href="index.html#reserver" class="btn btn-hero">Réserver maintenant</a>
+    </div>
+</header>
+
+<!-- INTRODUCTION HISTORIQUE DE SAILLY-AU-BOIS -->
+<div class="container">
+    <div class="intro-box">
+        <span class="section-subtitle">Mémoire & Patrimoine</span>
+        <h3 style="font-family: var(--serif); font-size: 1.6rem; color: var(--dark); margin-bottom: 12px;">
+            Sailly-au-Bois : Un village témoin de la Grande Guerre
+        </h3>
+        <p style="color: #475569; font-size: 0.95rem; line-height: 1.7; margin-bottom: 12px;">
+            Situé immédiatement à l'arrière du front de la Somme lors des batailles de 1916 et 1918, Sailly-au-Bois a servi de base de cantonnement et de repos pour les régiments britanniques, néo-zélandais et français. L'église Saint-Sulpice, qui fait face au domaine, a été reconstruite à l'identique dans les années 1920 avec sa pierre blanche typique.
+        </p>
+        <p style="color: #475569; font-size: 0.95rem; line-height: 1.7; margin: 0;">
+            Aujourd'hui, le village offre une quiétude remarquable, entouré de plaines vallonnées, de bosquets et de chemins de randonnée préservés, tout en restant à la porte des grands sites du Souvenir international.
+        </p>
+    </div>
+</div>
+
+<!-- SECTION 1 : CIRCUITS DE MÉMOIRE (14-18) -->
+<section class="guide-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Circuit du Souvenir</span>
+            <h2 class="section-title">Les Grands Sites Historiques</h2>
+            <p style="max-width: 700px; margin: 0 auto; color: #666; font-size: 0.95rem;">
+                Revivez l'émotion des batailles de la Somme et de l'Artois à moins de 25 minutes du gîte.
+            </p>
+        </div>
+
+        <div class="category-grid">
+            <!-- Mémorial de Thiepval -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&q=80&w=600" alt="Mémorial de Thiepval">
+                    <span class="spot-dist-badge">🚗 15 min (12 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Monument Majeur</span>
+                    <h4>Mémorial Franco-Britannique de Thiepval</h4>
+                    <p>
+                        Chef-d'œuvre de l'architecte Sir Edwin Lutyens, cette imposante arche de briques et de pierres rend hommage aux 72 000 soldats disparus de la bataille de la Somme. Musée et centre d'interprétation moderne sur place.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Thiepval</span>
+                        <a href="https://maps.google.com/?q=Memorial+Thiepval" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Parc Terre-Neuvien de Beaumont-Hamel -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1508873696983-2df5293cb395?auto=format&fit=crop&q=80&w=600" alt="Beaumont-Hamel">
+                    <span class="spot-dist-badge">🚗 12 min (9 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Tranchées Préservées</span>
+                    <h4>Mémorial Terre-Neuvien de Beaumont-Hamel</h4>
+                    <p>
+                        Un des rares sites du front occidental où le réseau complet de tranchées et les entonnoirs d'obus sont restés intacts sous la bruyère. Surmonté de la statue en bronze du Caribou emblématique.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Beaumont-Hamel</span>
+                        <a href="https://maps.google.com/?q=Beaumont-Hamel+Newfoundland+Memorial" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Cratère de Lochnagar -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=600" alt="Cratère de Lochnagar">
+                    <span class="spot-dist-badge">🚗 20 min (18 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Site Géologique & Historique</span>
+                    <h4>Le Cratère de Lochnagar (La Boisselle)</h4>
+                    <p>
+                        Le plus grand cratère de mine provoqué par l'homme lors d'un conflit armé : 91 mètres de diamètre et 21 mètres de profondeur, vestige du premier jour de la bataille de la Somme le 1er juillet 1916.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Ovillers-la-Boisselle</span>
+                        <a href="https://maps.google.com/?q=Lochnagar+Crater" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+        </div>
     </div>
 </section>
+
+<!-- SECTION 2 : VILLES & ESCAPADES CULTURELLES -->
+<section class="guide-section" style="background: white;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">À Découvrir à Proximité</span>
+            <h2 class="section-title">Villes d'Art & Patrimoine</h2>
+            <p style="max-width: 700px; margin: 0 auto; color: #666; font-size: 0.95rem;">
+                Flânez sur des places baroques flamandes ou visitez la capitale de la reconstruction.
+            </p>
+        </div>
+
+        <div class="category-grid">
+            <!-- Arras -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&q=80&w=600" alt="Grand-Place d'Arras">
+                    <span class="spot-dist-badge">🚗 25 min (23 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Joyau Flamand</span>
+                    <h4>Arras & Ses Deux Célèbres Places</h4>
+                    <p>
+                        Découvrez la Grand-Place et la Place des Héros, entourées de 155 façades de style baroque flamand. Ne manquez pas la montée au Beffroi (UNESCO) et la visite des Boves (carrières souterraines médiévales et abris 14-18).
+                    </p>
+                    <div class="spot-footer">
+                        <span>Arras Centre</span>
+                        <a href="https://maps.google.com/?q=Grand-Place+Arras" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Albert -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1548625361-195fe20a7b5d?auto=format&fit=crop&q=80&w=600" alt="Basilique d'Albert">
+                    <span class="spot-dist-badge">🚗 18 min (16 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Ville Étape Somme</span>
+                    <h4>Albert & La Basilique Notre-Dame de Brebières</h4>
+                    <p>
+                        Célèbre pour sa « Vierge Dorée » perchée sur le dôme de la basilique néo-byzantine. La ville abrite également le **Musée Somme 1916**, aménagé dans un souterrain de 250 mètres sous terre.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Albert</span>
+                        <a href="https://maps.google.com/?q=Basilique+Notre-Dame+de+Brebieres+Albert" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Doullens -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=600" alt="Citadelle de Doullens">
+                    <span class="spot-dist-badge">🚗 20 min (19 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Patrimoine Militaire</span>
+                    <h4>Doullens & Sa Citadelle Circulaire</h4>
+                    <p>
+                        L'une des premières citadelles bastionnées de France construite sous François Ier. C'est aussi à la mairie de Doullens que fut signé en 1918 le commandement unique allié confiant les troupes au Maréchal Foch.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Doullens</span>
+                        <a href="https://maps.google.com/?q=Citadelle+de+Doullens" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 3 : GASTRONOMIE & RESTAURANTS RECOMMANDÉS -->
+<section class="guide-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Tables & Saveurs</span>
+            <h2 class="section-title">Où Manger ? Bonnes Tables & Terroir</h2>
+            <p style="max-width: 700px; margin: 0 auto; color: #666; font-size: 0.95rem;">
+                Des estaminets authentiques aux brasseries artisanales pour savourer la cuisine du Nord.
+            </p>
+        </div>
+
+        <div class="category-grid">
+            <!-- Auberge locale -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=600" alt="Table du terroir">
+                    <span class="spot-dist-badge">🚗 10 min (8 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Auberge de Campagne</span>
+                    <h4>L'Auberge de la Baie d'Authie & environs</h4>
+                    <p>
+                        Idéal pour une cuisine généreuse de tradition : carbonnade flamande mijotée à la bière locale, welsh au cheddar affiné, volailles fermières et frites fraîches maison.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Cuisine du Terroir</span>
+                        <span style="color: var(--primary);">€€ &bull; Réservation conseillée</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Brasseries d'Arras -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=600" alt="Restaurant Grand Place Arras">
+                    <span class="spot-dist-badge">🚗 25 min (23 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Ambiance Brasserie</span>
+                    <h4>Les Brasseries de la Grand-Place</h4>
+                    <p>
+                        Installez-vous en terrasse face aux façades illuminées d'Arras. Dégustez la célèbre andouillette d'Arras, une planche de fromages régionaux (Maroilles, Vieux-Lille) et les bières de garde régionales.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Grand-Place, Arras</span>
+                        <span style="color: var(--primary);">€€ &bull; Service 7j/7</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Marché local -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&q=80&w=600" alt="Marché traditionnel">
+                    <span class="spot-dist-badge">🗓️ Mercredi & Samedi</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Producteurs Locaux</span>
+                    <h4>Le Grand Marché d'Arras & Vente à la Ferme</h4>
+                    <p>
+                        Élu parmi les plus beaux marchés de France le samedi matin : maraîchers locaux, charcuteries artisanales, miel d'Artois et fromages de ferme. Parfait pour approvisionner la cuisine du domaine !
+                    </p>
+                    <div class="spot-footer">
+                        <span>Produits Frais</span>
+                        <span style="color: var(--primary);">8h00 - 13h00</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 4 : ACTIVITÉS NATURE & FAMILLE -->
+<section class="guide-section" style="background: white;">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Plein Air & Détente</span>
+            <h2 class="section-title">Balades & Activités Nature</h2>
+            <p style="max-width: 700px; margin: 0 auto; color: #666; font-size: 0.95rem;">
+                Profitez du grand air directement depuis le gîte ou au fil des vallées environnantes.
+            </p>
+        </div>
+
+        <div class="category-grid">
+            <!-- Randonnée pédestre au départ du gîte -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&q=80&w=600" alt="Chemin de randonnée">
+                    <span class="spot-dist-badge">🚶 Au départ du gîte</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Circuit Pédestre</span>
+                    <h4>La Boucle des Bosquets de Sailly</h4>
+                    <p>
+                        Circuit pédestre de 8 km au départ de l'église Saint-Sulpice à travers les chemins creux, les champs de coquelicots en saison et les sous-bois ombragés. Idéal pour un jogging matinal ou une marche digestive.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Niveau facile (2h)</span>
+                        <span style="color: var(--primary);">Balisage jaune</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- La Vallée de l'Authie -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=600" alt="Vallée de l'Authie">
+                    <span class="spot-dist-badge">🚗 10 min (7 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Espace Naturel</span>
+                    <h4>La Haute Vallée de l'Authie</h4>
+                    <p>
+                        Une rivière côtière bucolique aux eaux limpides réputée pour ses parcours de pêche à la truite, ses vieux moulins à eau et ses petits villages pittoresques comme Authie et Pas-en-Artois.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Pêche & Balade</span>
+                        <span style="color: var(--primary);">Parcours balisés</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Belvédère du mémorial canadien de Vimy -->
+            <article class="spot-card">
+                <div class="spot-img-box">
+                    <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=600" alt="Colline de Vimy">
+                    <span class="spot-dist-badge">🚗 30 min (32 km)</span>
+                </div>
+                <div class="spot-content">
+                    <span class="spot-tag">Panorama & Parc</span>
+                    <h4>Le Parc Commémoratif de Vimy</h4>
+                    <p>
+                        Un superbe parc boisé de 100 hectares planté de pins canadiens sur les hauteurs de la crête de Vimy. Vue panoramique spectaculaire sur tout le bassin minier et les terrils du Pas-de-Calais.
+                    </p>
+                    <div class="spot-footer">
+                        <span>Vimy / Givenchy</span>
+                        <a href="https://maps.google.com/?q=Canadian+National+Vimy+Memorial" target="_blank" class="spot-link">Itinéraire &rarr;</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- CALL TO ACTION : RÉSERVER -->
+<section class="section" style="text-align: center; background: #eef2ea;">
+    <div class="container">
+        <h3 class="section-title">Prêt à séjourner au cœur de cette région ?</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 30px; color: #555; max-width: 650px; margin-left: auto; margin-right: auto;">
+            Posez vos valises dans un cadre paisible et ressourçant après vos journées de découverte.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <a href="gite.html" class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);">Découvrir nos 5 hébergements</a>
+            <a href="index.html#reserver" class="btn btn-hero">Réserver votre séjour</a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; Gîte de Sailly-au-Bois — Tous droits réservés.</p>
+    </div>
+</footer>
 
 <script src="auth-utils.js"></script>
 </body>
