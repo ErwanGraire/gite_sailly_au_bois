@@ -7,11 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
-    <!-- EmailJS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- SDK EmailJS v4 & Initialisation -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         (function(){
-            emailjs.init("Cj8CA4NPKdZs8yQxe");
+            if (typeof emailjs !== 'undefined') {
+                emailjs.init({
+                    publicKey: "3Y-lF_Ed3VvuB6iVh"
+                });
+            }
         })();
     </script>
 
@@ -111,7 +115,7 @@
             border: 1px solid #cbd5e1; 
             border-radius: 8px; 
             font-family: inherit;
-            font-size: 0.85rem;
+            font-size: 0.85rem; 
             box-sizing: border-box;
         }
 
@@ -256,7 +260,7 @@
         <div id="calendar-container"></div>
     </div>
 
-    <!-- 2. BLOCAGE MANUEL DE DATES (Airbnb, Téléphone, Travaux...) -->
+    <!-- 2. BLOCAGE MANUEL DE DATES -->
     <div class="admin-section">
         <h3 style="margin-top:0; margin-bottom: 8px;">Bloquer des dates manuellement</h3>
         <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 20px;">
@@ -308,7 +312,6 @@
     <!-- 3. GESTION DES RÉSERVATIONS -->
     <div class="admin-section">
         <div class="toolbar">
-            <!-- Onglets d'état -->
             <div class="status-tabs">
                 <button class="tab-btn active" data-status="en-attente" onclick="changerOngletStatut('en-attente')">
                     À traiter <span class="count" id="count-attente">0</span>
@@ -324,7 +327,6 @@
                 </button>
             </div>
 
-            <!-- Filtre Logement -->
             <div>
                 <select id="filtre-table-logement" class="filter-select" onchange="chargerDonneesAdmin()">
                     <option value="tous">Tous les hébergements</option>
@@ -415,7 +417,7 @@
     </div>
 </div>
 
-<!-- 6. MODALE DE REFUS / ANNULATION AVEC MOTIF (Anti-missclick & Explications) -->
+<!-- 6. MODALE DE REFUS / ANNULATION AVEC MOTIF -->
 <div id="modal-refus-reservation" class="modal-overlay">
     <div style="background: white; border-radius: 16px; width: 92%; max-width: 480px; padding: 26px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">

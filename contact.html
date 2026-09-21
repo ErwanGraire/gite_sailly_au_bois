@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact & Renseignements | Gîte de Sailly-au-Bois</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .contact-hero {
+            height: 38vh;
+            background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(106, 127, 78, 0.7)),
+                        url('photo_gite/grenier/grenier.JPG') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            margin: -40px auto 80px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .contact-card-info {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .info-block {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .info-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: #eef2ea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            color: var(--primary);
+        }
+
+        .info-text h4 {
+            margin: 0 0 5px 0;
+            font-family: var(--serif);
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .info-text p, .info-text a {
+            margin: 0;
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-decoration: none;
+        }
+
+        .info-text a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .contact-card-form {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 35px 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eee;
+        }
+
+        .contact-card-form h3 {
+            font-family: var(--serif);
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .contact-card-form p {
+            color: #64748b;
+            font-size: 0.92rem;
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group-contact {
+            margin-bottom: 18px;
+        }
+
+        .form-group-contact label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+
+        .form-group-contact input,
+        .form-group-contact select,
+        .form-group-contact textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group-contact input:focus,
+        .form-group-contact select:focus,
+        .form-group-contact textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106, 127, 78, 0.2);
+        }
+
+        .contact-alert {
+            display: none;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .contact-alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        @media (max-width: 860px) {
+            .contact-wrapper {
+                grid-template-columns: 1fr;
+                margin-top: 20px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.41 0-8-3.59-8-8V8l8-4 8 4v4c0 4.41-3.59 8-8 8z"/>
+                </svg>
+            </div>
+            <span>Gîte Sailly</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="gite.html">Le Gîte</a></li>
+            <li><a href="decouvrir.html">Découvrir</a></li>
+            <li><a href="contact.html" style="color: var(--primary); font-weight: 700;">Contact</a></li>
+            <li id="nav-auth-container" style="display: flex; align-items: center; gap: 15px;"></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- HERO CONTACT -->
+<header class="contact-hero">
+    <div class="container">
+        <h1 style="font-family: var(--serif); font-size: 2.5rem; margin-bottom: 10px;">Contact & Renseignements</h1>
+        <p style="font-size: 1.1rem; opacity: 0.95; max-width: 600px; margin: 0 auto;">
+            Une question sur un hébergement, une demande spécifique ou l'organisation d'un séjour en groupe ? Écrivez-nous.
+        </p>
+    </div>
+</header>
+
+<div class="container">
+    <div class="contact-wrapper">
+        
+        <!-- BLOC INFORMATIONS & COORDONNÉES -->
+        <aside class="contact-card-info">
+            <h3 style="font-family: var(--serif); font-size: 1.4rem; color: var(--dark); margin: 0;">Nos Coordonnées</h3>
+
+            <div class="info-block">
+                <div class="info-icon">📍</div>
+                <div class="info-text">
+                    <h4>Adresse</h4>
+                    <p>
+                        2 rue Saint-Jean<br>
+                        62111 Sailly-au-Bois<br>
+                        Pas-de-Calais, France
+                    </p>
+                </div>
+            </div>
+
+            <div class="info-block">
+                <div class="info-icon">📞</div>
+                <div class="info-text">
+                    <h4>Téléphone</h4>
+                    <p><a href="tel:+33600000000">+33 (0)6 00 00 00 00</a></p>
+                    <small style="color: #64748b;">Du lundi au dimanche, 9h - 19h</small>
+                </div>
+            </div>
+
+            <div class="info-block">
+                <div class="info-icon">✉️</div>
+                <div class="info-text">
+                    <h4>Adresse e-mail</h4>
+                    <p><a href="mailto:contact@gite-sailly.fr">contact@gite-sailly.fr</a></p>
+                    <small style="color: #64748b;">Réponse sous 24 heures</small>
+                </div>
+            </div>
+
+            <div class="info-block">
+                <div class="info-icon">🕒</div>
+                <div class="info-text">
+                    <h4>Horaires de séjour</h4>
+                    <p>
+                        <strong>Arrivée :</strong> 16h00 – 19h00<br>
+                        <strong>Départ :</strong> jusqu'à 11h00
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 20px;">
+                <h4 style="font-family: var(--serif); font-size: 1.05rem; margin-bottom: 8px;">Itinéraire GPS</h4>
+                <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 12px;">
+                    Coordonnées exactes : 50.121301, 2.595008
+                </p>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=50.121301,2.595008" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="width: 100%; text-align: center; box-sizing: border-box; font-size: 0.88rem;">
+                    Ouvrir l'itinéraire Google Maps &rarr;
+                </a>
+            </div>
+        </aside>
+
+        <!-- FORMULAIRE DE MESSAGE -->
+        <main class="contact-card-form">
+            <h3>Envoyez-nous un message</h3>
+            <p>Remplissez ce formulaire pour toute demande d'information ou de devis personnalisé.</p>
+
+            <div id="contact-success" class="contact-alert contact-alert-success">
+                ✅ Votre message a bien été envoyé ! Nous vous répondrons dans les plus brefs délais.
+            </div>
+
+            <form id="contact-form">
+                <div class="form-row">
+                    <div class="form-group-contact">
+                        <label for="contact-nom">Nom & Prénom *</label>
+                        <input type="text" id="contact-nom" name="nom" required placeholder="Votre nom complet">
+                    </div>
+                    <div class="form-group-contact">
+                        <label for="contact-email">Adresse e-mail *</label>
+                        <input type="email" id="contact-email" name="email" required placeholder="nom@exemple.fr">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-contact">
+                        <label for="contact-tel">Téléphone (facultatif)</label>
+                        <input type="tel" id="contact-tel" name="telephone" placeholder="06 12 34 56 78">
+                    </div>
+                    <div class="form-group-contact">
+                        <label for="contact-sujet">Objet de votre demande *</label>
+                        <select id="contact-sujet" name="sujet" required>
+                            <option value="Question générale">Question générale sur le gîte</option>
+                            <option value="Privatisation Domaine">Privatisation du Domaine complet</option>
+                            <option value="Événement de groupe">Événement familial / Séminaire</option>
+                            <option value="Autre demande">Autre demande</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group-contact">
+                    <label for="contact-message">Votre message *</label>
+                    <textarea id="contact-message" name="message" rows="5" required placeholder="Précisez votre demande, les dates envisagées ou vos questions..."></textarea>
+                </div>
+
+                <button type="submit" id="btn-submit-contact" class="btn btn-hero" style="width: 100%; border: none; cursor: pointer; padding: 13px;">
+                    Envoyer votre message
+                </button>
+            </form>
+        </main>
+
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Gîte de Sailly-au-Bois — <a href="confidentialite.html" style="color: inherit; text-decoration: underline;">Confidentialité & Cookies</a></p>
+    </div>
+</footer>
+
+<!-- SDK Officiel EmailJS v4 -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script src="auth-utils.js"></script>
+<script src="cookies.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialisation EmailJS
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init({
+            publicKey: '3Y-lF_Ed3VvuB6iVh'
+        });
+    }
+
+    // 2. Pré-remplissage automatique si l'utilisateur est connecté
+    const utilisateur = typeof obtenirUtilisateurConnecte === 'function' ? obtenirUtilisateurConnecte() : null;
+    if (utilisateur) {
+        const nomInput = document.getElementById('contact-nom');
+        const emailInput = document.getElementById('contact-email');
+        const telInput = document.getElementById('contact-tel');
+
+        if (nomInput && utilisateur.nom) nomInput.value = utilisateur.nom;
+        if (emailInput && utilisateur.email) emailInput.value = utilisateur.email;
+        if (telInput && utilisateur.telephone) telInput.value = utilisateur.telephone;
+    }
+
+    // 3. Gestion de l'envoi du message
+    const form = document.getElementById('contact-form');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btnSubmit = document.getElementById('btn-submit-contact');
+            const successBox = document.getElementById('contact-success');
+            const texteInitial = btnSubmit.textContent;
+
+            const nom = document.getElementById('contact-nom').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const tel = document.getElementById('contact-tel').value.trim() || 'Non renseigné';
+            const sujetSelect = document.getElementById('contact-sujet');
+            const sujet = sujetSelect.options[sujetSelect.selectedIndex].text;
+            const message = document.getElementById('contact-message').value.trim();
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Envoi en cours...';
+
+            try {
+                // Envoi 100 % synchronisé avec les variables de ton template EmailJS
+                await emailjs.send('service_p3hgn5k', 'template_dy98wud', {
+                    type_notification: `Contact - ${sujet}`,
+                    nom_contact: nom,
+                    email_contact: email,
+                    tel_contact: tel,
+                    contenu_details: message
+                });
+
+                if (successBox) {
+                    successBox.style.display = 'block';
+                    form.reset();
+                    setTimeout(() => {
+                        successBox.style.display = 'none';
+                    }, 6000);
+                } else {
+                    alert('Votre message a bien été envoyé !');
+                    form.reset();
+                }
+
+            } catch (err) {
+                console.error('Erreur envoi contact :', err);
+                alert("Une erreur est survenue lors de l'envoi du message. Veuillez réessayer.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = texteInitial;
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

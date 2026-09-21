@@ -430,34 +430,23 @@ function supprimerReservation(id) {
     chargerDonneesAdmin();
 }
 
-// 8. ENVOI COURRIELS VIA EMAILJS (TEMPLATE UNIQUE ET DYNAMIQUE)
+// 8. ENVOI COURRIELS VIA EMAILJS (UTILISATION DU TEMPLATE CLIENT template_8ng5jpb)
 
 // A. Validation du séjour
 function envoyerEmailConfirmationClient(res) {
-    const infosArrivee = `
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 0.85rem; color: #475569;">
-            📍 <strong>Adresse :</strong> Face à l'église Saint-Sulpice, 62111 Sailly-au-Bois<br>
-            🕒 <strong>Horaires :</strong> Arrivée à partir de 16h00 / Départ avant 11h00<br>
-            🚗 <strong>Stationnement :</strong> Parking privé gratuit disponible sur place
-        </div>
-    `;
+    const detailsArrivee = `Votre demande pour le logement "${res.logement || 'Domaine complet'}" du ${res.dateArrivee} au ${res.dateDepart} est validée ! Arrivée à partir de 16h00 au 2 rue Saint-Jean, 62111 Sailly-au-Bois. Stationnement gratuit dans la cour.`;
 
     const templateParams = {
         email_destinataire: res.email,
         sujet: "Confirmation de votre séjour — Gîte de Sailly-au-Bois 🌿",
-        titre_principal: "Réservation confirmée ! 🌿",
-        couleur_titre: "#16a34a",
-        name: res.nom || "Client",
-        message_introduction: "Excellente nouvelle ! Votre demande de séjour a bien été validée par l'hôte. Voici les détails de votre arrivée :",
-        logement: res.logement || "Domaine complet",
-        date_arrivee: res.dateArrivee,
-        date_depart: res.dateDepart,
-        bloc_info_supplementaire: infosArrivee,
-        lien_action: `${window.location.origin}/mon-compte.html`,
-        texte_bouton: "Consulter mon espace client"
+        to_name: res.nom || "Client",
+        message_intro: detailsArrivee,
+        action_button_text: "Consulter mon espace client",
+        action_link: `${window.location.origin}/mon-compte.html`,
+        message_outro: "Pour toute question ou demande particulière avant votre arrivée, n'hésitez pas à nous contacter."
     };
 
-    emailjs.send('service_p3hgn5k', 'template_dy98wud', templateParams)
+    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
         .then(() => {
             alert(`✅ Réservation validée et e-mail envoyé à ${res.email}.`);
         })
@@ -469,29 +458,19 @@ function envoyerEmailConfirmationClient(res) {
 
 // B. Refus ou annulation du séjour par l'hôte
 function envoyerEmailRefusClient(res, motif) {
-    const blocMotif = `
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 0.85rem; color: #dc2626;">
-            <strong>Motif communiqué par l'hôte :</strong><br>
-            <em>« ${motif} »</em>
-        </div>
-    `;
+    const messageRefus = `Nous ne pouvons malheureusement pas donner une suite favorable à votre demande de réservation pour "${res.logement || 'Domaine complet'}" aux dates du ${res.dateArrivee} au ${res.dateDepart}.\n\nMotif communiqué par l'hôte : « ${motif} »`;
 
     const templateParams = {
         email_destinataire: res.email,
-        sujet: "Information concernant votre demande de séjour — Gîte de Sailly-au-Bois",
-        titre_principal: "Mise à jour de votre séjour",
-        couleur_titre: "#dc2626",
-        name: res.nom || "Client",
-        message_introduction: "Nous vous informons que votre réservation n'a pas pu être retenue ou a dû être annulée :",
-        logement: res.logement || "Domaine complet",
-        date_arrivee: res.dateArrivee,
-        date_depart: res.dateDepart,
-        bloc_info_supplementaire: blocMotif,
-        lien_action: `${window.location.origin}/mon-compte.html`,
-        texte_bouton: "Voir mon espace client"
+        sujet: "Information concernant votre réservation — Gîte de Sailly-au-Bois",
+        to_name: res.nom || "Client",
+        message_intro: messageRefus,
+        action_button_text: "Choisir d'autres dates",
+        action_link: `${window.location.origin}/index.html#reserver`,
+        message_outro: "Nous restons à votre entière disposition pour tout autre séjour ou renseignement."
     };
 
-    emailjs.send('service_p3hgn5k', 'template_dy98wud', templateParams)
+    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
         .then(() => {
             alert(`Réservation annulée. Un courriel explicatif a été envoyé à ${res.email}.`);
         })

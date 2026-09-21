@@ -1,3 +1,18 @@
+// Fonction utilitaire d'échappement anti-XSS
+function echapperTexte(str) {
+    if (typeof echapperHTML === 'function') {
+        return echapperHTML(str);
+    }
+    if (!str) return '';
+    return str
+        .toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 window.addEventListener('scroll', function() {
     const navbar = document.querySelector('.navbar');
     if (!navbar) return;
@@ -247,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const inputDepart = document.querySelector('input[name="depart"]');
             const inputNom = document.querySelector('input[name="nom"]');
             const inputEmail = document.querySelector('input[name="email"]');
+            const inputMessage = document.querySelector('textarea[name="message"]');
             const logementChoisi = getLogementActif();
 
             // 1. Authentification
@@ -291,16 +307,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // 4. Sauvegarde locale
+            // 4. Sauvegarde locale assainie contre les failles XSS
             const nouvelleReservation = {
                 id: Date.now(),
-                nom: inputNom ? inputNom.value : '',
-                email: inputEmail ? inputEmail.value : '',
-                logement: logementChoisi,
+                nom: echapperTexte(inputNom ? inputNom.value.trim() : ''),
+                email: echapperTexte(inputEmail ? inputEmail.value.trim() : ''),
+                logement: echapperTexte(logementChoisi),
                 dateArrivee: inputArrivee.value,
                 dateDepart: inputDepart.value,
                 statut: 'en-attente',
-                message: (document.querySelector('textarea[name="message"]') || {}).value || '',
+                message: echapperTexte(inputMessage ? inputMessage.value.trim() : ''),
                 dateCreation: new Date().toISOString()
             };
 

@@ -85,6 +85,7 @@
             font-family: inherit;
             font-size: 1rem;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
         .form-group input:focus {
             outline: none;
@@ -140,24 +141,18 @@
             color: #c33;
             display: block;
         }
-        .auth-divider {
-            text-align: center;
-            margin: 25px 0;
-            color: #888;
-            font-size: 0.9rem;
+        .auth-link-forgot {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 20px;
         }
-        .auth-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #888;
-            font-size: 0.95rem;
-        }
-        .auth-link a {
+        .auth-link-forgot a {
             color: var(--primary);
+            font-size: 0.85rem;
             text-decoration: none;
             font-weight: 600;
         }
-        .auth-link a:hover {
+        .auth-link-forgot a:hover {
             text-decoration: underline;
         }
     </style>
@@ -177,6 +172,7 @@
             <li><a href="index.html">Accueil</a></li>
             <li><a href="gite.html">Le Gîte</a></li>
             <li><a href="decouvrir.html">Découvrir</a></li>
+            <li><a href="contact.html">Contact</a></li>
         </ul>
     </div>
 </nav>
@@ -207,6 +203,12 @@
                 <input type="password" id="connexion-password" name="password" placeholder="••••••••" required>
                 <div class="form-error"></div>
             </div>
+
+            <!-- LIEN MOT DE PASSE OUBLIÉ -->
+            <div class="auth-link-forgot">
+                <a href="#" id="lien-mdp-oublie">Mot de passe oublié ?</a>
+            </div>
+
             <button type="submit" class="auth-submit">Se connecter</button>
         </form>
 
@@ -242,7 +244,40 @@
     </div>
 </div>
 
+<!-- MODALE MOT DE PASSE OUBLIÉ -->
+<div id="modal-reset-mdp" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 3000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border-radius: 14px; max-width: 440px; width: 100%; padding: 35px 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); position: relative;">
+        <button id="fermer-modal-reset" style="position: absolute; top: 15px; right: 15px; border: none; background: transparent; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+        
+        <h3 style="font-family: var(--serif); color: var(--dark); margin: 0 0 10px 0; font-size: 1.4rem;">Mot de passe oublié</h3>
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.5;">
+            Entrez votre adresse e-mail de compte. Nous vous enverrons un lien direct pour définir un nouveau mot de passe.
+        </p>
+
+        <div id="reset-alerte-message" style="display: none; padding: 12px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 15px; line-height: 1.4;"></div>
+
+        <form id="form-demande-reset">
+            <div style="margin-bottom: 18px;">
+                <label for="reset-email" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: var(--dark);">Votre adresse e-mail</label>
+                <input type="email" id="reset-email" required placeholder="nom@exemple.fr" style="width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
+            </div>
+            <button type="submit" id="btn-envoyer-reset" class="btn btn-hero" style="width: 100%; border: none; cursor: pointer; padding: 12px; font-size: 0.95rem; border-radius: 50px;">
+                Envoyer le lien de réinitialisation
+            </button>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Gîte de Sailly-au-Bois — <a href="confidentialite.html" style="color: inherit; text-decoration: underline;">Confidentialité & Cookies</a></p>
+    </div>
+</footer>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- Tes scripts -->
 <script src="auth.js"></script>
+<script src="cookies.js"></script>
 </body>
 </html>
-
