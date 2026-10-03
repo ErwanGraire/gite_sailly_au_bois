@@ -7,85 +7,119 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Styles de la modale interactive */
+        /* --- MODALE IMMERSIVE GRAND FORMAT --- */
         .modal-backdrop {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.85); /* Fond plus sombre pour faire ressortir les photos */
+            backdrop-filter: blur(8px);
             z-index: 2000;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
         }
+
         .modal-container {
             background: #ffffff;
-            border-radius: 18px;
-            max-width: 800px;
+            border-radius: 20px;
+            max-width: 1050px; /* Élargi pour donner de l'air aux photos */
             width: 100%;
-            max-height: 90vh;
+            max-height: 94vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: modalFadeIn 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            animation: modalFadeIn 0.25s ease-out;
         }
+
         @keyframes modalFadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .modal-close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: white;
-            border: 1px solid #ddd;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
+
+        /* Zone Photo Plein Écran */
+        .modal-gallery-wrapper {
+            position: relative;
+            background: #0b0f19;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
         }
-        .modal-close-btn:hover {
-            background: #eee;
-            transform: scale(1.05);
-        }
+
         .modal-hero-img {
             width: 100%;
-            height: 340px;
-            object-fit: cover;
-            border-radius: 18px 18px 0 0;
+            height: 520px; /* Rehaussé de 340px à 520px pour un vrai impact visuel */
+            object-fit: contain; /* Conserve 100% de la photo sans rien couper */
+            background: #0f172a;
+            display: block;
+            transition: opacity 0.2s ease-in-out;
         }
+
+        /* Barre de miniatures valorisée */
         .modal-thumbnails {
             display: flex;
-            gap: 10px;
-            padding: 12px 25px;
-            background: #fafafa;
-            border-bottom: 1px solid #eee;
+            gap: 12px;
+            padding: 14px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
             overflow-x: auto;
+            align-items: center;
         }
+
         .modal-thumb {
-            width: 75px;
-            height: 55px;
+            width: 110px; /* Vignettes agrandies de 75px à 110px */
+            height: 75px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             border: 2px solid transparent;
-            opacity: 0.7;
-            transition: all 0.2s;
+            opacity: 0.85; /* Bien plus lisible */
+            transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
             flex-shrink: 0;
         }
+
         .modal-thumb:hover, .modal-thumb.active {
             opacity: 1;
             border-color: var(--primary);
-            transform: scale(1.04);
+            transform: scale(1.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+
+        /* Bouton Fermer modernisé */
+        .modal-close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.7);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(15, 23, 42, 0.95);
+            transform: scale(1.08);
+        }
+
+        /* Responsive pour tablettes et mobiles */
+        @media (max-width: 768px) {
+            .modal-hero-img {
+                height: 320px;
+            }
+            .modal-thumb {
+                width: 85px;
+                height: 60px;
+            }
+        }
+
         .modal-body {
             padding: 25px 30px 35px;
         }
@@ -121,6 +155,7 @@
             gap: 12px;
             list-style: none;
             margin-top: 15px;
+            padding: 0;
         }
         .modal-features-list li {
             font-size: 0.95rem;
@@ -141,6 +176,11 @@
             color: var(--primary);
             font-weight: 700;
         }
+        .common-spaces-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
     </style>
 </head>
 <body>
@@ -156,7 +196,7 @@
         </a>
         <ul class="nav-links">
             <li><a href="index.html">Accueil</a></li>
-            <li><a href="gite.html">Le Gîte</a></li>
+            <li><a href="gite.html" style="color: var(--primary); font-weight: 700;">Le Gîte</a></li>
             <li><a href="decouvrir.html">Découvrir</a></li>
             <li><a href="contact.html">Contact</a></li>
             <li id="nav-auth-container" style="display: flex; align-items: center; gap: 15px;"></li>
@@ -171,27 +211,51 @@
             <span class="section-subtitle">Découverte du domaine</span>
             <h2 class="section-title">Les Espaces du Gîte</h2>
             <p style="max-width: 700px; margin: 0 auto; color: #666; font-size: 1.05rem;">
-                Le gîte offre une grande pièce à vivre conviviale à partager ainsi que <strong>5 hébergements autonomes</strong> dotés chacun d'une chambre et de sa propre salle de bain. Cliquez sur un hébergement pour en voir les photos et détails.
+                Le gîte offre de généreux espaces partagés pour se rassembler ainsi que <strong>5 hébergements autonomes</strong> dotés chacun d'une chambre et de sa propre salle de bain. Cliquez sur un espace pour en découvrir les photos et détails.
             </p>
         </div>
 
-        <div class="common-space-card clickable-card" onclick="ouvrirFicheLogement('communes')">
-            <div class="common-space-img">
-                <img src="photo_gite/parties communes/sejour.jpg" onerror="this.src='https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000'" alt="Grande cuisine et séjour commun">
-            </div>
-            <div class="common-space-info">
-                <span class="room-tag">Espace Partagé</span>
-                <h3>La Grande Pièce de Vie & Cuisine</h3>
-                <p>
-                    L'endroit parfait pour se réunir : une grande cuisine équipée avec îlot et une grande salle à manger accueillant facilement tous les convives.
-                </p>
-                <div class="room-features">
-                    <span>🍳 Cuisine équipée</span>
-                    <span>🍽️ Grande tablée</span>
-                    <span>🛋️ Salon convivial</span>
-                    <span>☕ Cafetières & Thé</span>
+        <div class="common-spaces-container">
+            <!-- 1. Grande Pièce de Vie & Cuisine -->
+            <div class="common-space-card clickable-card" onclick="ouvrirFicheLogement('communes')">
+                <div class="common-space-img">
+                    <img src="photo_gite/parties communes/sejour.jpg" onerror="this.src='https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000'" alt="Grande cuisine et séjour commun">
                 </div>
-                <div class="card-click-hint" style="margin-top: 15px;">Explorer les photos et équipements de la pièce &rarr;</div>
+                <div class="common-space-info">
+                    <span class="room-tag">Espace Partagé</span>
+                    <h3>La Grande Pièce de Vie & Cuisine</h3>
+                    <p>
+                        L'endroit parfait pour se réunir : une grande cuisine équipée avec îlot et une vaste salle à manger accueillant facilement tous les convives.
+                    </p>
+                    <div class="room-features">
+                        <span>🍳 Cuisine équipée</span>
+                        <span>🍽️ Grande tablée</span>
+                        <span>🛋️ Coin séjour</span>
+                        <span>☕ Cafetières & Thé</span>
+                    </div>
+                    <div class="card-click-hint" style="margin-top: 15px;">Explorer les photos et équipements de la pièce &rarr;</div>
+                </div>
+            </div>
+
+            <!-- 2. Salon Commun & Salle TV -->
+            <div class="common-space-card clickable-card" onclick="ouvrirFicheLogement('salletv')">
+                <div class="common-space-img">
+                    <img src="photo_gite/Photos salle télé/IMG_20260905_082633554.jpg" onerror="this.src='https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=1000'" alt="Salle télé et salon commun">
+                </div>
+                <div class="common-space-info">
+                    <span class="room-tag">Espace Partagé</span>
+                    <h3>Espace Salon & Salle TV</h3>
+                    <p>
+                        Une pièce commune dédiée à la détente et aux loisirs. Idéale pour se poser au calme, regarder un film ou une émission sur grand écran, ou partager un jeu en famille.
+                    </p>
+                    <div class="room-features">
+                        <span>📺 Télévision grand écran</span>
+                        <span>🛋️ Canapés & Fauteuils confort</span>
+                        <span>📶 Wi-Fi haut débit</span>
+                        <span>🎲 Espace lecture & jeux</span>
+                    </div>
+                    <div class="card-click-hint" style="margin-top: 15px;">Explorer les photos de la salle télé &rarr;</div>
+                </div>
             </div>
         </div>
     </div>
@@ -277,7 +341,7 @@
                     <p class="lodging-desc">Spacieuse et chaleureuse, grand confort avec salle d'eau contemporaine.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~26 m² &bull; Orientation Sud (Très lumineux)</li>
-                        <li>🛏️ Lit Queen-size confort hôtelier</li>
+                        <li>🛏️️ Lit Queen-size confort hôtelier</li>
                         <li>🚿 Salle de bain avec douche à l'italienne</li>
                     </ul>
                     <div class="lodging-actions">
@@ -313,7 +377,7 @@
             <!-- 4. Le Pigeonnier -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('pigeonnier')">
                 <div class="lodging-img-wrapper">
-                    <img src="photo_gite/pigeonnier/pigeonnier2.JPG" onerror="this.src='https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600'" alt="Le Pigeonnier">
+                    <img src="photo_gite/pigeonnier/IMG_20260910_160442960.jpg" onerror="this.src='https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=600'" alt="Le Pigeonnier">
                 </div>
                 <div class="lodging-content">
                     <div class="card-header-price">
@@ -323,7 +387,7 @@
                     <p class="lodging-desc">Le charme d'une architecture unique et d'une belle hauteur sous plafond.</p>
                     <ul class="lodging-amenities">
                         <li>📏 ~28 m² en duplex &bull; Orientation Sud-Est</li>
-                        <li>🛏️ Espace nuit en mezzanine</li>
+                        <li>🛏 Espace nuit en mezzanine</li>
                         <li>🚿 Salle de bain privative au rez-de-chaussée</li>
                     </ul>
                     <div class="lodging-actions">
@@ -336,7 +400,7 @@
             <!-- 5. Le Grenier -->
             <article class="lodging-card clickable-card" onclick="ouvrirFicheLogement('grenier')">
                 <div class="lodging-img-wrapper">
-                    <img src="photo_gite/grenier/grenier.JPG" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600'" alt="Le Grenier">
+                    <img src="photo_gite/grenier/FullSizeRender.jpeg" onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=600'" alt="Le Grenier">
                 </div>
                 <div class="lodging-content">
                     <div class="card-header-price">
@@ -360,20 +424,24 @@
     </div>
 </section>
 
-<!-- MODALE DÉTAILS DU LOGEMENT -->
+<!-- MODALE DÉTAILS DU LOGEMENT (VERSION IMMERSIVE) -->
 <div id="modal-logement" class="modal-backdrop" onclick="fermerModalSiExterieur(event)">
     <div class="modal-container">
-        <button class="modal-close-btn" onclick="fermerModal()">&times;</button>
-        <img id="modal-img-principale" class="modal-hero-img" src="" alt="Aperçu du logement">
+        <button class="modal-close-btn" onclick="fermerModal()" title="Fermer la vue">&times;</button>
+        
+        <div class="modal-gallery-wrapper">
+            <img id="modal-img-principale" class="modal-hero-img" src="" alt="Aperçu du logement">
+        </div>
+        
         <div id="modal-miniatures" class="modal-thumbnails"></div>
 
         <div class="modal-body">
             <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
-                <h3 id="modal-titre" style="font-family: var(--serif); font-size: 1.8rem; color: var(--dark); margin: 0 0 8px 0;"></h3>
-                <div id="modal-prix" style="font-size: 1.3rem; font-weight: 700; color: var(--primary);"></div>
+                <h3 id="modal-titre" style="font-family: var(--serif); font-size: 1.9rem; color: var(--dark); margin: 0 0 8px 0;"></h3>
+                <div id="modal-prix" style="font-size: 1.35rem; font-weight: 700; color: var(--primary);"></div>
             </div>
             
-            <p id="modal-description" style="color: #666; font-size: 1rem; line-height: 1.6; margin-top: 10px;"></p>
+            <p id="modal-description" style="color: #475569; font-size: 1.05rem; line-height: 1.6; margin-top: 10px;"></p>
 
             <div class="modal-specs-bar">
                 <div class="spec-item">
@@ -394,11 +462,13 @@
                 </div>
             </div>
 
-            <h4 style="font-family: var(--serif); color: var(--primary); margin-top: 20px; font-size: 1.2rem;">Équipements inclus</h4>
+            <h4 style="font-family: var(--serif); color: var(--primary); margin-top: 22px; font-size: 1.2rem;">Équipements inclus</h4>
             <ul id="modal-liste-equipements" class="modal-features-list"></ul>
             
-            <div style="margin-top: 25px; text-align: right; border-top: 1px solid #eee; padding-top: 18px;">
-                <a id="modal-btn-reserver" href="index.html#reserver" class="btn btn-hero" style="font-size: 0.95rem; padding: 10px 24px;">Réserver cet hébergement</a>
+            <div style="margin-top: 28px; text-align: right; border-top: 1px solid #edf2f7; padding-top: 20px;">
+                <a id="modal-btn-reserver" href="index.html#reserver" class="btn btn-hero" style="font-size: 1rem; padding: 12px 28px;">
+                    Réserver cet hébergement
+                </a>
             </div>
         </div>
     </div>
@@ -416,7 +486,6 @@
         </div>
 
         <div class="location-card">
-            <!-- Informations d'accès -->
             <div class="location-info">
                 <span class="location-badge">📍 Adresse exacte</span>
                 <h3>Gîte de Sailly-au-Bois</h3>
@@ -443,7 +512,6 @@
                     </div>
                 </div>
 
-                <!-- Bouton d'itinéraire GPS calé sur 50.121301, 2.595008 -->
                 <a href="https://www.google.com/maps/dir/?api=1&destination=50.121301,2.595008" 
                    target="_blank" 
                    rel="noopener noreferrer" 
@@ -453,7 +521,6 @@
                 </a>
             </div>
 
-            <!-- Carte interactive centrée pile sur vos coordonnées -->
             <div class="location-map-wrapper">
                 <iframe 
                     title="Carte Sailly-au-Bois"
@@ -482,7 +549,7 @@
 
 <footer>
     <div class="container">
-        <p>&copy; Gîte de Sailly-au-Bois — Tous droits réservés.</p>
+        <p>&copy; 2026 Gîte de Sailly-au-Bois — Tous droits réservés.</p>
     </div>
 </footer>
 
@@ -506,9 +573,33 @@ const logementsData = {
             "❄️ Réfrigérateur / congélateur XXL",
             "🧼 Lave-vaisselle silencieux",
             "☕ Cafetières, bouilloire & grille-pain",
-            "🛋️ Grand canapé d'angle & coin détente",
+            "🛋️️ Grand canapé d'angle & coin détente",
             "🔥 Ambiance chaleureuse",
             "📶 Couverture Wi-Fi intégrale"
+        ]
+    },
+    salletv: {
+        titre: "Salon Détente & Salle TV",
+        prix: "Inclus",
+        description: "Un espace partagé chaleureux et confortable dédié aux loisirs. Que ce soit pour une soirée cinéma, suivre une compétition sportive ou se retrouver pour lire et échanger, ce salon offre toute la convivialité attendue.",
+        surface: "~30 m²",
+        orientation: "Sud",
+        couchage: "Espace commun",
+        sdbType: "Partie commune",
+        images: [
+            "photo_gite/Photos salle télé/IMG_20260905_082633554.jpg",
+            "photo_gite/Photos salle télé/IMG_20260905_082607891.jpg",
+            "photo_gite/Photos salle télé/IMG_20260905_082621960_HDR.jpg",
+            "photo_gite/Photos salle télé/IMG_20260905_082646554_HDR.jpg",
+            "photo_gite/Photos salle télé/IMG_20260911_184955090_HDR (1).jpg"
+        ],
+        equipements: [
+            "📺 Télévision grand écran haute définition",
+            "🛋️ Grands canapés et assises confortables",
+            "📶 Wi-Fi haut débit",
+            "🎲 Sélection de jeux de société et livres",
+            "🔌 Prises multiples pour recharger vos appareils",
+            "🌿 Vue dégagée sur la cour du domaine"
         ]
     },
     bergerie: {
@@ -522,8 +613,7 @@ const logementsData = {
         images: [
             "photo_gite/Photos Bergerie/IMG_9504.jpeg",
             "photo_gite/Photos Bergerie/IMG_9505.jpeg",
-            "photo_gite/Photos Bergerie/IMG_9506.jpeg",
-            "photo_gite/Photos Bergerie/IMG_9506 (1).jpeg"
+            "photo_gite/Photos Bergerie/IMG_9506.jpeg"
         ],
         equipements: [
             "🛏️ Literie hôtelière haut de gamme",
@@ -591,11 +681,10 @@ const logementsData = {
         couchage: "1 Lit double en mezzanine",
         sdbType: "Privative en RDC",
         images: [
-            "photo_gite/pigeonnier/pigeonnier2.JPG",
-            "photo_gite/pigeonnier/pigeonnier3.JPG",
-            "photo_gite/pigeonnier/pigeonnier4.JPG",
-            "photo_gite/pigeonnier/pigeonnier5.JPG",
-            "photo_gite/pigeonnier/SdB pigeonnier.JPG"
+            "photo_gite/pigeonnier/IMG_20260910_160442960.jpg",
+            "photo_gite/pigeonnier/IMG_20260910_160448401.jpg",
+            "photo_gite/pigeonnier/IMG_20260910_160505456.jpg",
+            "photo_gite/pigeonnier/IMG_20260910_160525750_HDR.jpg"
         ],
         equipements: [
             "🕊️ Charme architectural unique",
@@ -615,9 +704,10 @@ const logementsData = {
         couchage: "1 Lit double (160x200)",
         sdbType: "Privative intégrée",
         images: [
-            "photo_gite/grenier/grenier.JPG",
-            "photo_gite/grenier/grenier2.JPG",
-            "photo_gite/grenier/SdB grenier.JPG"
+            "photo_gite/grenier/FullSizeRender.jpeg",
+            "photo_gite/grenier/FullSizeRender (1).jpeg",
+            "photo_gite/grenier/IMG_9493.jpeg",
+            "photo_gite/grenier/IMG_9496.jpeg"
         ],
         equipements: [
             "🪵 Magnifique charpente et poutres apparentes",
@@ -642,13 +732,15 @@ function ouvrirFicheLogement(id) {
     document.getElementById('modal-couchage').textContent = data.couchage;
     document.getElementById('modal-sdb-type').textContent = data.sdbType;
 
-    // Lien réservation dynamique
+    // Bouton de réservation adapté selon espace commun ou chambre
     const btnReserverModal = document.getElementById('modal-btn-reserver');
     if (btnReserverModal) {
-        if (id === 'communes') {
+        if (id === 'communes' || id === 'salletv') {
             btnReserverModal.href = 'index.html?logement=domaine#reserver';
+            btnReserverModal.textContent = 'Réserver le Domaine complet';
         } else {
             btnReserverModal.href = `index.html?logement=${id}#reserver`;
+            btnReserverModal.textContent = 'Réserver cet hébergement';
         }
     }
 
