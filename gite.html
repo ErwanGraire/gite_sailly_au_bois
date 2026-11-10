@@ -488,7 +488,7 @@
         <div class="location-card">
             <div class="location-info">
                 <span class="location-badge">📍 Adresse exacte</span>
-                <h3>Gîte de Sailly-au-Bois</h3>
+                <h3>Une étape à Sailly-Au-Bois</h3>
                 <p class="location-address">
                     <strong>2 rue Saint-Jean</strong><br>
                     62111 Sailly-au-Bois<br>
@@ -549,7 +549,7 @@
 
 <footer>
     <div class="container">
-        <p>&copy; 2026 Gîte de Sailly-au-Bois — Tous droits réservés.</p>
+        <p>&copy; 2026 Une étape à Sailly-Au-Bois — Tous droits réservés.</p>
     </div>
 </footer>
 
@@ -749,11 +749,12 @@ function ouvrirFicheLogement(id) {
     mainImg.onerror = () => { mainImg.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=1000'; };
 
     const thumbsContainer = document.getElementById('modal-miniatures');
-    thumbsContainer.innerHTML = '';
+    thumbsContainer.replaceChildren();
     data.images.forEach((imgUrl, index) => {
         const thumb = document.createElement('img');
         thumb.src = imgUrl;
         thumb.className = `modal-thumb ${index === 0 ? 'active' : ''}`;
+        thumb.alt = `${data.titre} - photo ${index + 1}`;
         thumb.onerror = () => { thumb.src = 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=200'; };
         thumb.onclick = () => {
             mainImg.src = imgUrl;
@@ -764,7 +765,11 @@ function ouvrirFicheLogement(id) {
     });
 
     const equipList = document.getElementById('modal-liste-equipements');
-    equipList.innerHTML = data.equipements.map(e => `<li>${e}</li>`).join('');
+    equipList.replaceChildren(...data.equipements.map(equipement => {
+        const item = document.createElement('li');
+        item.textContent = equipement;
+        return item;
+    }));
 
     document.getElementById('modal-logement').style.display = 'flex';
     document.body.style.overflow = 'hidden';

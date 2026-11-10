@@ -1,58 +1,44 @@
-// --- CONFIGURATION EMAILJS ---
-const EMAILJS_CONFIG = {
-    publicKey: '3Y-lF_Ed3VvuB6iVh',
-    serviceId: 'service_p3hgn5k',
-    templateClient: 'template_8ng5jpb', // Modèle pour les voyageurs (reset mdp, confirmation, validation)
-    templateAdmin: 'template_dy98wud'   // Modèle pour les alertes hôte (contact, réservations)
-};
+import { auth, db } from './firebase-config.js';
+import {
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    signInWithEmailAndPassword,
+    signOut
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import {
+    doc,
+    setDoc,
+    serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// Initialisation globale EmailJS
-(function() {
-    if (typeof emailjs !== 'undefined') {
-        emailjs.init({
-            publicKey: EMAILJS_CONFIG.publicKey
-        });
+const DELAI_RESET_MS = 60000;
+let dernierEnvoiReset = 0;
+let actionAuthentificationEnCours = false;
+let etatInitialAuthVerifie = false;
+
+function estEmailValide(email) {
+    return typeof email === 'string' &&
+        email.length <= 254 &&
+        /^[^\s<>@]+@[^\s<>@]+\.[A-Za-z]{2,63}$/.test(email);
+}
+
+function estNomValide(nom) {
+    return typeof nom === 'string' &&
+        nom.length >= 2 &&
+        nom.length <= 100 &&
+        /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u.test(nom);
+}
+
+function estTelephoneValide(telephone) {
+    if (typeof telephone !== 'string' || !/^\+?[0-9][0-9\s().-]{5,22}$/.test(telephone)) {
+        return false;
     }
-})();
 
-// --- GESTION DES ONGLETS (CONNEXION / INSCRIPTION) ---
-document.querySelectorAll('.auth-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-        const tabName = this.getAttribute('data-tab');
-
-        // Désactiver tous les onglets et masquer les formulaires
-        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-
-        // Activer l'onglet et le formulaire sélectionnés
-        this.classList.add('active');
-        const formActive = document.getElementById(tabName + '-form');
-        if (formActive) formActive.classList.add('active');
-
-        // Réinitialiser les messages d'état
-        const authMsg = document.getElementById('auth-message');
-        if (authMsg) {
-            authMsg.className = 'auth-message';
-            authMsg.textContent = '';
-        }
-    });
-});
-
-// --- FONCTIONS DE VALIDATION ---
-function validerEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
+    const chiffres = telephone.replace(/\D/g, '');
+    return chiffres.length >= 7 && chiffres.length <= 15;
 }
 
-function validerMotDePasse(password) {
-    return password.length >= 6;
-}
-
-function validerTel(tel) {
-    return tel.replace(/\s/g, '').length >= 10;
-}
-
-// --- GESTION DE L'AFFICHAGE DES ERREURS ---
 function afficherErreur(input, message) {
     input.classList.add('error');
     const errorDiv = input.parentElement.querySelector('.form-error');
@@ -79,137 +65,227 @@ function afficherMessage(message, type) {
     }
 }
 
-// --- FORMULAIRE DE CONNEXION ---
+function afficherAlerteReset(message, type = 'error') {
+    const alerteBox = document.getElementById('reset-alerte-message');
+    if (!alerteBox) return;
+
+    alerteBox.style.display = 'block';
+    if (type === 'success') {
+        alerteBox.style.background = '#ecfdf5';
+        alerteBox.style.color = '#065f46';
+        alerteBox.style.border = '1px solid #34d399';
+    } else {
+        alerteBox.style.background = '#fee2e2';
+        alerteBox.style.color = '#991b1b';
+        alerteBox.style.border = '1px solid #f87171';
+    }
+    alerteBox.textContent = message;
+}
+
+function messageErreurFirebase(error) {
+    switch (error.code) {
+        case 'auth/email-already-in-use':
+            return 'Cet email est déjà utilisé.';
+        case 'auth/invalid-email':
+            return 'Adresse e-mail invalide.';
+        case 'auth/weak-password':
+            return 'Le mot de passe doit comporter au moins 6 caractères.';
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+            return 'Email ou mot de passe incorrect.';
+        case 'auth/too-many-requests':
+            return 'Trop de tentatives. Veuillez réessayer plus tard.';
+        case 'auth/network-request-failed':
+            return 'Connexion impossible. Vérifiez votre accès à Internet.';
+        case 'auth/operation-not-allowed':
+            return 'La connexion par e-mail et mot de passe n’est pas activée dans Firebase.';
+        default:
+            console.error('Erreur Firebase Authentication:', error);
+            return 'Une erreur est survenue. Veuillez réessayer.';
+    }
+}
+
+document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        const tabName = this.getAttribute('data-tab');
+
+        document.querySelectorAll('.auth-tab').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+
+        this.classList.add('active');
+        const formActive = document.getElementById(`${tabName}-form`);
+        if (formActive) formActive.classList.add('active');
+
+        const authMessage = document.getElementById('auth-message');
+        if (authMessage) {
+            authMessage.className = 'auth-message';
+            authMessage.textContent = '';
+        }
+    });
+});
+
 const formConnexion = document.getElementById('connexion-form');
 if (formConnexion) {
-    formConnexion.addEventListener('submit', function(e) {
-        e.preventDefault();
+    formConnexion.addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-        const email = document.getElementById('connexion-email').value.trim();
-        const password = document.getElementById('connexion-password').value;
+        const emailInput = document.getElementById('connexion-email');
+        const passwordInput = document.getElementById('connexion-password');
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-        if (!validerEmail(email)) {
-            afficherErreur(document.getElementById('connexion-email'), 'Email invalide');
+        if (!estEmailValide(email)) {
+            afficherErreur(emailInput, 'Email invalide');
             return;
         }
-        cacherErreur(document.getElementById('connexion-email'));
+        cacherErreur(emailInput);
 
-        const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs')) || [];
-        const utilisateur = utilisateurs.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-        if (!utilisateur || utilisateur.password !== btoa(password)) {
-            afficherMessage('Email ou mot de passe incorrect', 'error');
+        if (!password || password.length > 128) {
+            afficherErreur(passwordInput, 'Mot de passe invalide');
             return;
         }
+        cacherErreur(passwordInput);
 
-        // Sauvegarde de la session active
-        localStorage.setItem('utilisateurConnecte', JSON.stringify({
-            id: utilisateur.id,
-            nom: utilisateur.nom,
-            email: utilisateur.email,
-            telephone: utilisateur.telephone || '',
-            photo: utilisateur.photo || null,
-            actif: utilisateur.actif || false
-        }));
+        const submitButton = formConnexion.querySelector('[type="submit"]');
+        submitButton.disabled = true;
+        actionAuthentificationEnCours = true;
 
-        afficherMessage('✅ Connexion réussie ! Redirection...', 'success');
-
-        setTimeout(() => {
-            window.location.href = 'index.html#reserver';
-        }, 1500);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            afficherMessage('✅ Connexion réussie ! Redirection...', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html#reserver';
+            }, 1000);
+        } catch (error) {
+            afficherMessage(messageErreurFirebase(error), 'error');
+        } finally {
+            actionAuthentificationEnCours = false;
+            submitButton.disabled = false;
+        }
     });
 }
 
-// --- FORMULAIRE D'INSCRIPTION ---
 const formInscription = document.getElementById('inscription-form');
 if (formInscription) {
-    formInscription.addEventListener('submit', function(e) {
-        e.preventDefault();
+    formInscription.addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-        const nom = document.getElementById('inscription-nom').value.trim();
-        const tel = document.getElementById('inscription-tel').value.trim();
-        const email = document.getElementById('inscription-email').value.trim();
-        const password = document.getElementById('inscription-password').value;
-        const passwordConfirm = document.getElementById('inscription-password-confirm').value;
-
+        const prenomInput = document.getElementById('inscription-prenom');
+        const nomInput = document.getElementById('inscription-nom');
+        const telephoneInput = document.getElementById('inscription-tel');
+        const emailInput = document.getElementById('inscription-email');
+        const passwordInput = document.getElementById('inscription-password');
+        const passwordConfirmInput = document.getElementById('inscription-password-confirm');
+        const prenom = prenomInput.value.trim();
+        const nom = nomInput.value.trim();
+        const telephone = telephoneInput.value.trim();
+        const email = emailInput.value.trim().toLowerCase();
+        const password = passwordInput.value;
+        const passwordConfirm = passwordConfirmInput.value;
         let hasError = false;
 
-        if (nom.length < 2) {
-            afficherErreur(document.getElementById('inscription-nom'), 'Nom trop court');
+        if (!estNomValide(prenom)) {
+            afficherErreur(prenomInput, 'Prénom invalide (2 à 100 caractères)');
             hasError = true;
         } else {
-            cacherErreur(document.getElementById('inscription-nom'));
+            cacherErreur(prenomInput);
         }
 
-        if (!validerTel(tel)) {
-            afficherErreur(document.getElementById('inscription-tel'), 'Téléphone invalide');
+        if (!estNomValide(nom)) {
+            afficherErreur(nomInput, 'Nom invalide (2 à 100 caractères)');
             hasError = true;
         } else {
-            cacherErreur(document.getElementById('inscription-tel'));
+            cacherErreur(nomInput);
         }
 
-        if (!validerEmail(email)) {
-            afficherErreur(document.getElementById('inscription-email'), 'Email invalide');
+        if (!estTelephoneValide(telephone) || telephone.length > 25) {
+            afficherErreur(telephoneInput, 'Téléphone invalide');
             hasError = true;
         } else {
-            cacherErreur(document.getElementById('inscription-email'));
+            cacherErreur(telephoneInput);
         }
 
-        if (!validerMotDePasse(password)) {
-            afficherErreur(document.getElementById('inscription-password'), '6 caractères minimum');
+        if (!estEmailValide(email)) {
+            afficherErreur(emailInput, 'Email invalide');
             hasError = true;
         } else {
-            cacherErreur(document.getElementById('inscription-password'));
+            cacherErreur(emailInput);
+        }
+
+        if (password.length < 6 || password.length > 128) {
+            afficherErreur(passwordInput, 'Entre 6 et 128 caractères');
+            hasError = true;
+        } else {
+            cacherErreur(passwordInput);
         }
 
         if (password !== passwordConfirm) {
-            afficherErreur(document.getElementById('inscription-password-confirm'), 'Les mots de passe ne correspondent pas');
+            afficherErreur(passwordConfirmInput, 'Les mots de passe ne correspondent pas');
             hasError = true;
         } else {
-            cacherErreur(document.getElementById('inscription-password-confirm'));
+            cacherErreur(passwordConfirmInput);
         }
 
         if (hasError) return;
 
-        const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs')) || [];
-        if (utilisateurs.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-            afficherMessage('Cet email est déjà utilisé.', 'error');
-            return;
+        const submitButton = formInscription.querySelector('[type="submit"]');
+        submitButton.disabled = true;
+        actionAuthentificationEnCours = true;
+
+        let compteCree = false;
+        try {
+            const credential = await createUserWithEmailAndPassword(auth, email, password);
+            compteCree = true;
+            await setDoc(doc(db, 'users', credential.user.uid), {
+                nom,
+                prenom,
+                email: credential.user.email || email,
+                telephone,
+                createdAt: serverTimestamp()
+            });
+            if (typeof window.actualiserProfilFirebase === 'function') {
+                window.actualiserProfilFirebase({
+                    uid: credential.user.uid,
+                    nom,
+                    prenom,
+                    email: credential.user.email || email,
+                    telephone,
+                    emailVerified: credential.user.emailVerified
+                });
+            }
+
+            afficherMessage('✅ Inscription réussie ! Bienvenue.', 'success');
+            setTimeout(() => {
+                window.location.href = 'mon-compte.html';
+            }, 1000);
+        } catch (error) {
+            if (compteCree) {
+                console.error('Erreur lors de la création du profil Firestore:', error);
+                try {
+                    await signOut(auth);
+                } catch (signOutError) {
+                    console.error('Impossible de fermer la session après échec Firestore:', signOutError);
+                }
+                afficherMessage('Le compte a été créé, mais son profil n’a pas pu être enregistré. Veuillez réessayer ou contacter le support.', 'error');
+            } else {
+                afficherMessage(messageErreurFirebase(error), 'error');
+            }
+        } finally {
+            actionAuthentificationEnCours = false;
+            submitButton.disabled = false;
         }
-
-        const nouvelUtilisateur = {
-            id: Date.now(),
-            nom: nom,
-            telephone: tel,
-            email: email,
-            password: btoa(password),
-            photo: null,
-            actif: false,
-            dateInscription: new Date().toISOString()
-        };
-
-        utilisateurs.push(nouvelUtilisateur);
-        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
-        localStorage.setItem('utilisateurConnecte', JSON.stringify(nouvelUtilisateur));
-
-        afficherMessage('✅ Inscription réussie ! Bienvenue.', 'success');
-
-        setTimeout(() => {
-            window.location.href = 'mon-compte.html';
-        }, 1500);
     });
 }
 
-// --- GESTION DU MOT DE PASSE OUBLIÉ ---
 const lienMdpOublie = document.getElementById('lien-mdp-oublie');
 const modalReset = document.getElementById('modal-reset-mdp');
 const btnFermerReset = document.getElementById('fermer-modal-reset');
 const formDemandeReset = document.getElementById('form-demande-reset');
 
 if (lienMdpOublie && modalReset) {
-    lienMdpOublie.addEventListener('click', function(e) {
-        e.preventDefault();
+    lienMdpOublie.addEventListener('click', function(event) {
+        event.preventDefault();
         modalReset.style.display = 'flex';
     });
 
@@ -219,89 +295,62 @@ if (lienMdpOublie && modalReset) {
         });
     }
 
-    modalReset.addEventListener('click', function(e) {
-        if (e.target === modalReset) {
-            modalReset.style.display = 'none';
-        }
+    modalReset.addEventListener('click', function(event) {
+        if (event.target === modalReset) modalReset.style.display = 'none';
     });
 }
 
 if (formDemandeReset) {
-    formDemandeReset.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const inputEmail = document.getElementById('reset-email');
-        const email = inputEmail.value.trim().toLowerCase();
-        const alerteBox = document.getElementById('reset-alerte-message');
-        const btnSubmit = document.getElementById('btn-envoyer-reset');
+    formDemandeReset.addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-        const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs')) || [];
-        const userIndex = utilisateurs.findIndex(u => u.email.toLowerCase() === email);
-
-        if (userIndex === -1) {
-            alerteBox.style.display = 'block';
-            alerteBox.style.background = '#fee2e2';
-            alerteBox.style.color = '#991b1b';
-            alerteBox.style.border = '1px solid #f87171';
-            alerteBox.textContent = "Aucun compte n'est enregistré avec cet e-mail.";
+        const email = document.getElementById('reset-email').value.trim().toLowerCase();
+        const submitButton = document.getElementById('btn-envoyer-reset');
+        if (!estEmailValide(email)) {
+            afficherAlerteReset('Veuillez saisir une adresse e-mail valide.');
             return;
         }
 
-        // Création du jeton unique (validité 1 heure)
-        const token = Array.from(crypto.getRandomValues(new Uint8Array(20)))
-            .map(b => b.toString(16).padStart(2, '0')).join('');
-        const expiration = Date.now() + 3600000;
+        if (Date.now() - dernierEnvoiReset < DELAI_RESET_MS) {
+            afficherAlerteReset('Veuillez patienter une minute avant de demander un nouveau lien.');
+            return;
+        }
 
-        utilisateurs[userIndex].resetToken = token;
-        utilisateurs[userIndex].resetTokenExpires = expiration;
-        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
-        // URL dynamique vers reset-password.html
-        const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-        const resetLien = `${baseUrl}reset-password.html?token=${token}`;
-
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Envoi en cours...';
+        submitButton.disabled = true;
+        submitButton.textContent = 'Envoi en cours...';
 
         try {
-            if (typeof emailjs !== 'undefined') {
-                await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateClient, {
-                    email_destinataire: email,
-                    to_name: utilisateurs[userIndex].nom,
-                    sujet: 'Réinitialisation de votre mot de passe - Gîte de Sailly-au-Bois',
-                    message_intro: 'Vous avez demandé la réinitialisation de votre mot de passe pour accéder à votre espace personnel.',
-                    action_button_text: 'Définir un nouveau mot de passe',
-                    action_link: resetLien,
-                    message_outro: 'Ce lien sécurisé reste actif pendant 1 heure. Si vous n\'êtes pas à l\'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.'
-                });
-            } else {
-                console.log('🔗 [DEV - EmailJS non chargé] Lien généré :', resetLien);
-            }
-
-            alerteBox.style.display = 'block';
-            alerteBox.style.background = '#ecfdf5';
-            alerteBox.style.color = '#065f46';
-            alerteBox.style.border = '1px solid #34d399';
-            alerteBox.textContent = "Un e-mail de réinitialisation vient de vous être envoyé. Vérifiez votre boîte de réception.";
+            await sendPasswordResetEmail(auth, email);
+            dernierEnvoiReset = Date.now();
+            afficherAlerteReset(
+                'Si un compte est associé à cette adresse, un e-mail de réinitialisation vient de lui être envoyé.',
+                'success'
+            );
             formDemandeReset.reset();
-
-        } catch (err) {
-            console.error('Erreur EmailJS:', err);
-            alerteBox.style.display = 'block';
-            alerteBox.style.background = '#fee2e2';
-            alerteBox.style.color = '#991b1b';
-            alerteBox.style.border = '1px solid #f87171';
-            alerteBox.textContent = "Erreur lors de l'envoi du mail. Veuillez réessayer dans un instant.";
+        } catch (error) {
+            afficherAlerteReset(messageErreurFirebase(error));
         } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Envoyer le lien de réinitialisation';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Envoyer le lien de réinitialisation';
         }
     });
 }
 
-// --- SÉCURITÉ : REDIRECTION SI DÉJÀ CONNECTÉ ---
-window.addEventListener('load', function() {
-    const utilisateurConnecte = localStorage.getItem('utilisateurConnecte');
-    if (utilisateurConnecte) {
+window.deconnecterFirebase = async function() {
+    try {
+        await signOut(auth);
+        window.location.href = 'auth.html';
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion Firebase:', error);
+        afficherMessage('Impossible de vous déconnecter. Veuillez réessayer.', 'error');
+    }
+};
+window.deconnecter = window.deconnecterFirebase;
+
+onAuthStateChanged(auth, user => {
+    if (etatInitialAuthVerifie) return;
+    etatInitialAuthVerifie = true;
+    if (user && !actionAuthentificationEnCours) {
         window.location.href = 'index.html';
     }
 });

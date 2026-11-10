@@ -1,17 +1,9 @@
-// Fonction utilitaire d'échappement anti-XSS
-function echapperTexte(str) {
-    if (typeof echapperHTML === 'function') {
-        return echapperHTML(str);
-    }
-    if (!str) return '';
-    return str
-        .toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+import { db } from './firebase-config.js';
+import {
+    addDoc,
+    collection,
+    getDocs
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 window.addEventListener('scroll', function() {
     const navbar = document.querySelector('.navbar');
@@ -62,7 +54,7 @@ function preselectionnerLogementDepuisURL() {
     }
 }
 
-// 2. CHARGER LES RÉSERVATIONS (fichier + localStorage)
+// 2. CHARGER LES RÉSERVATIONS (fichier + Firestore)
 async function chargerReservations() {
     try {
         const response = await fetch('reservations.json');
@@ -74,11 +66,23 @@ async function chargerReservations() {
         reservationsData = [];
     }
 
-    const reservationsLocales = JSON.parse(localStorage.getItem('reservations')) || [];
-    reservationsData = [...reservationsData, ...reservationsLocales];
+    try {
+        const snapshot = await getDocs(collection(db, 'reservations'));
+        const reservationsFirestore = snapshot.docs.map(reservationDoc => ({
+            ...reservationDoc.data(),
+            id: reservationDoc.id
+        }));
+        reservationsData = [...reservationsData, ...reservationsFirestore];
+    } catch (error) {
+        console.error('Impossible de charger les réservations depuis Firestore:', error);
+        afficherErreur('Impossible de charger les disponibilités depuis Firebase. Veuillez actualiser la page.');
+        return false;
+    }
 
+    window.reservationsData = reservationsData;
     console.log('📊 Total réservations:', reservationsData.length);
     mettreAJourDatesIndisponibles();
+    return true;
 }
 
 // Obtenir le logement sélectionné dans le formulaire
@@ -157,7 +161,8 @@ function validerDates() {
     const inputDepart = document.querySelector('input[name="depart"]');
     const logement = getLogementActif();
 
-    if (!inputArrivee || !inputDepart || !inputArrivee.value || !inputDepart.value) {
+    if (!inputArrivee || !inputDepart ||
+        !estDateISOValide(inputArrivee.value) || !estDateISOValide(inputDepart.value)) {
         cacherErreur();
         return;
     }
@@ -257,7 +262,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // D. Gestion du formulaire de réservation
     const form = document.querySelector('.booking-form');
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            try {
+                await window.firebaseAuthReady;
+            } catch (error) {
+                console.error('Impossible de vérifier la session Firebase:', error);
+                afficherErreur('Impossible de vérifier votre session. Veuillez réessayer.');
+                return;
+            }
+
+            const utilisateurConnecte = window.firebaseAuth && window.firebaseAuth.currentUser;
+            if (!utilisateurConnecte) {
+                afficherErreur("Vous devez être connecté pour réserver. Veuillez vous connecter ou vous inscrire.");
+                return;
+            }
+
+            if (!await chargerReservations()) return;
+
             const inputArrivee = document.querySelector('input[name="arrivee"]');
             const inputDepart = document.querySelector('input[name="depart"]');
             const inputNom = document.querySelector('input[name="nom"]');
@@ -265,26 +287,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const inputMessage = document.querySelector('textarea[name="message"]');
             const logementChoisi = getLogementActif();
 
-            // 1. Authentification
-            const utilisateurConnecte = localStorage.getItem('utilisateurConnecte');
-            if (!utilisateurConnecte) {
-                e.preventDefault();
-                afficherErreur("Vous devez être connecté pour réserver. Veuillez vous connecter ou vous inscrire.");
-                return;
-            }
-
             // 2. Vérification des dates
             if (!inputArrivee || !inputDepart || !inputArrivee.value || !inputDepart.value) {
-                e.preventDefault();
                 afficherErreur("Veuillez sélectionner les dates d'arrivée et de départ.");
                 return;
             }
 
             const dateArrivee = new Date(inputArrivee.value);
             const dateDepart = new Date(inputDepart.value);
+            const nom = inputNom ? inputNom.value.trim() : '';
+            const email = inputEmail ? inputEmail.value.trim() : '';
+            const message = inputMessage ? inputMessage.value.trim() : '';
+            const logementsAutorises = Array.from(document.getElementById('booking-logement').options, option => option.value);
+
+            if (nom.length < 2 || nom.length > 100 ||
+                !/^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u.test(nom) ||
+                !estEmailValide(email) ||
+                message.length > 2000 || contientContenuDangereux(message) ||
+                !logementsAutorises.includes(logementChoisi)) {
+                afficherErreur('Vérifiez votre nom, votre e-mail et votre message (2 000 caractères maximum, sans balisage HTML).');
+                return;
+            }
 
             if (dateDepart <= dateArrivee) {
-                e.preventDefault();
                 afficherErreur("La date de départ doit être strictement postérieure à la date d'arrivée.");
                 inputDepart.value = '';
                 return;
@@ -302,29 +327,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (conflitTrouve) {
-                e.preventDefault();
                 afficherErreur(`Les dates sélectionnées sont déjà réservées pour "${logementChoisi}".`);
                 return;
             }
 
-            // 4. Sauvegarde locale assainie contre les failles XSS
+            // 4. Enregistrement dans Firestore
             const nouvelleReservation = {
-                id: Date.now(),
-                nom: echapperTexte(inputNom ? inputNom.value.trim() : ''),
-                email: echapperTexte(inputEmail ? inputEmail.value.trim() : ''),
-                logement: echapperTexte(logementChoisi),
+                nom: nom,
+                email: email,
+                logement: logementChoisi,
                 dateArrivee: inputArrivee.value,
                 dateDepart: inputDepart.value,
                 statut: 'en-attente',
-                message: echapperTexte(inputMessage ? inputMessage.value.trim() : ''),
+                message: message,
                 dateCreation: new Date().toISOString()
             };
 
-            const reservationsLocales = JSON.parse(localStorage.getItem('reservations')) || [];
-            reservationsLocales.push(nouvelleReservation);
-            localStorage.setItem('reservations', JSON.stringify(reservationsLocales));
+            try {
+                const reservationAjoutee = await addDoc(
+                    collection(db, 'reservations'),
+                    nouvelleReservation
+                );
+                reservationsData.push({ ...nouvelleReservation, id: reservationAjoutee.id });
+                window.reservationsData = reservationsData;
+            } catch (error) {
+                console.error('Impossible d’enregistrer la réservation dans Firestore:', error);
+                afficherErreur('Impossible d’enregistrer la demande dans Firebase. Veuillez réessayer.');
+                return;
+            }
 
-            chargerReservations();
+            mettreAJourDatesIndisponibles();
             afficherSucces(`✅ Demande pour "${logementChoisi}" enregistrée ! Redirection en cours...`);
 
             setTimeout(() => {

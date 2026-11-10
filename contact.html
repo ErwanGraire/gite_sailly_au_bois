@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact & Renseignements | Gîte de Sailly-au-Bois</title>
+    <title>Contact & Renseignements | Une étape à Sailly-Au-Bois</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -269,18 +269,18 @@
                 <div class="form-row">
                     <div class="form-group-contact">
                         <label for="contact-nom">Nom & Prénom *</label>
-                        <input type="text" id="contact-nom" name="nom" required placeholder="Votre nom complet">
+                        <input type="text" id="contact-nom" name="nom" required maxlength="100" autocomplete="name" placeholder="Votre nom complet">
                     </div>
                     <div class="form-group-contact">
                         <label for="contact-email">Adresse e-mail *</label>
-                        <input type="email" id="contact-email" name="email" required placeholder="nom@exemple.fr">
+                        <input type="email" id="contact-email" name="email" required maxlength="254" autocomplete="email" placeholder="nom@exemple.fr">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group-contact">
                         <label for="contact-tel">Téléphone (facultatif)</label>
-                        <input type="tel" id="contact-tel" name="telephone" placeholder="06 12 34 56 78">
+                        <input type="tel" id="contact-tel" name="telephone" maxlength="25" autocomplete="tel" placeholder="06 12 34 56 78">
                     </div>
                     <div class="form-group-contact">
                         <label for="contact-sujet">Objet de votre demande *</label>
@@ -295,7 +295,7 @@
 
                 <div class="form-group-contact">
                     <label for="contact-message">Votre message *</label>
-                    <textarea id="contact-message" name="message" rows="5" required placeholder="Précisez votre demande, les dates envisagées ou vos questions..."></textarea>
+                    <textarea id="contact-message" name="message" rows="5" required maxlength="2000" placeholder="Précisez votre demande, les dates envisagées ou vos questions..."></textarea>
                 </div>
 
                 <button type="submit" id="btn-submit-contact" class="btn btn-hero" style="width: 100%; border: none; cursor: pointer; padding: 13px;">
@@ -309,7 +309,7 @@
 
 <footer>
     <div class="container">
-        <p>&copy; 2026 Gîte de Sailly-au-Bois — <a href="confidentialite.html" style="color: inherit; text-decoration: underline;">Confidentialité & Cookies</a></p>
+        <p>&copy; 2026 Une étape à Sailly-Au-Bois — <a href="confidentialite.html" style="color: inherit; text-decoration: underline;">Confidentialité & Cookies</a></p>
     </div>
 </footer>
 
@@ -321,6 +321,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    let envoiContactEnCours = false;
+    let dernierEnvoiContact = 0;
+    const delaiEntreEnvois = 30000;
+
     // 1. Initialisation EmailJS
     if (typeof emailjs !== 'undefined') {
         emailjs.init({
@@ -352,23 +356,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nom = document.getElementById('contact-nom').value.trim();
             const email = document.getElementById('contact-email').value.trim();
-            const tel = document.getElementById('contact-tel').value.trim() || 'Non renseigné';
+            const telSaisi = document.getElementById('contact-tel').value.trim();
+            const tel = telSaisi || 'Non renseigné';
             const sujetSelect = document.getElementById('contact-sujet');
-            const sujet = sujetSelect.options[sujetSelect.selectedIndex].text;
+            const sujetsAutorises = ['Question générale', 'Privatisation Domaine', 'Événement de groupe', 'Autre demande'];
+            const sujet = sujetSelect.value;
             const message = document.getElementById('contact-message').value.trim();
 
+            const nomValide = nom.length >= 2 && nom.length <= 100 &&
+                /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u.test(nom) &&
+                !contientContenuDangereux(nom);
+            if (!nomValide || !estEmailValide(email) ||
+                (telSaisi && (!estTelephoneValide(telSaisi) || telSaisi.length > 25)) ||
+                !sujetsAutorises.includes(sujet) ||
+                !message || message.length > 2000 || contientContenuDangereux(message)) {
+                alert('Vérifiez les champs : nom valide, e-mail valide, téléphone valide si renseigné et message de 2 000 caractères maximum sans balisage HTML.');
+                return;
+            }
+            if (envoiContactEnCours || Date.now() - dernierEnvoiContact < delaiEntreEnvois) {
+                alert('Veuillez patienter avant d’envoyer un nouveau message.');
+                return;
+            }
+            if (!window.emailjs || typeof window.emailjs.send !== 'function') {
+                alert('Le service d’envoi est momentanément indisponible. Veuillez réessayer plus tard.');
+                return;
+            }
+
+            envoiContactEnCours = true;
             btnSubmit.disabled = true;
             btnSubmit.textContent = 'Envoi en cours...';
 
             try {
-                // Envoi 100 % synchronisé avec les variables de ton template EmailJS
-                await emailjs.send('service_p3hgn5k', 'template_dy98wud', {
+                await window.emailjs.send('service_p3hgn5k', 'template_dy98wud', {
                     type_notification: `Contact - ${sujet}`,
                     nom_contact: nom,
                     email_contact: email,
                     tel_contact: tel,
                     contenu_details: message
                 });
+                dernierEnvoiContact = Date.now();
 
                 if (successBox) {
                     successBox.style.display = 'block';
@@ -385,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Erreur envoi contact :', err);
                 alert("Une erreur est survenue lors de l'envoi du message. Veuillez réessayer.");
             } finally {
+                envoiContactEnCours = false;
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = texteInitial;
             }

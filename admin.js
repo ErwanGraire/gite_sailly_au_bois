@@ -4,14 +4,97 @@ const ADMIN_CREDENTIALS = {
 };
 
 let statutFiltreActif = 'en-attente';
+let dernierEnvoiEmailAdmin = 0;
+const DELAI_ENTRE_EMAILS_ADMIN = 5000;
+let dbAdmin;
+let firestoreAdmin;
+let reservationsAdmin = [];
+let firestoreAdminReady;
+
+function initialiserFirestoreAdmin() {
+    if (!firestoreAdminReady) {
+        firestoreAdminReady = Promise.all([
+            import('./firebase-config.js'),
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+        ]).then(([configuration, firestore]) => {
+            dbAdmin = configuration.db;
+            firestoreAdmin = firestore;
+        }).catch(error => {
+            console.error('Impossible d’initialiser Firestore pour le calendrier admin:', error);
+            throw error;
+        });
+    }
+    return firestoreAdminReady;
+}
+
+async function chargerReservationsFirestore() {
+    await initialiserFirestoreAdmin();
+    const snapshot = await firestoreAdmin.getDocs(
+        firestoreAdmin.collection(dbAdmin, 'reservations')
+    );
+    reservationsAdmin = snapshot.docs.map(reservationDoc => ({
+        ...reservationDoc.data(),
+        id: reservationDoc.id
+    }));
+    window.reservationsData = reservationsAdmin;
+    return reservationsAdmin;
+}
+
+async function enregistrerReservationFirestore(reservation) {
+    await initialiserFirestoreAdmin();
+    const { id, ...donnees } = reservation;
+    await firestoreAdmin.setDoc(
+        firestoreAdmin.doc(dbAdmin, 'reservations', id),
+        donnees
+    );
+}
+
+function afficherErreurChargementReservations(error) {
+    console.error('Impossible de charger les réservations Firestore:', error);
+    const resBody = document.getElementById('admin-res-body');
+    const calendar = document.getElementById('calendar-container');
+    const message = 'Impossible de charger les réservations depuis Firebase. Vérifiez la connexion et les règles Firestore.';
+    if (resBody) resBody.textContent = message;
+    if (calendar) calendar.textContent = message;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
+    const resBody = document.getElementById('admin-res-body');
+    if (resBody) {
+        resBody.addEventListener('click', function(event) {
+            const button = event.target.closest('button[data-action][data-id]');
+            if (!button) return;
+
+            const id = button.dataset.id;
+            if (!id) return;
+
+            switch (button.dataset.action) {
+                case 'edit':
+                    ouvrirModalEdition(id);
+                    break;
+                case 'delete':
+                    supprimerReservation(id);
+                    break;
+                case 'refuse':
+                    demanderRefus(id);
+                    break;
+                case 'validate':
+                    demanderValidation(id);
+                    break;
+            }
+        });
+    }
     verifierSessionAdmin();
 });
 
+function lireReservationsAdmin() {
+    return reservationsAdmin;
+}
+
 // 1. GESTION DE SESSION
 function verifierSessionAdmin() {
-    const isAuth = localStorage.getItem('sessionAdminActive') === 'true';
+    const resultatSession = lireStockageSecurise('sessionAdminActive');
+    const isAuth = resultatSession.ok && resultatSession.valeur === 'true';
     const overlay = document.getElementById('admin-login-overlay');
 
     if (isAuth) {
@@ -26,7 +109,11 @@ function tentativeConnexionAdmin() {
     const errorMsg = document.getElementById('admin-error');
 
     if (emailSaisi === ADMIN_CREDENTIALS.email && passSaisi === ADMIN_CREDENTIALS.password) {
-        localStorage.setItem('sessionAdminActive', 'true');
+        if (!ecrireStockageSecurise('sessionAdminActive', 'true')) {
+            errorMsg.textContent = 'Le stockage local est indisponible dans ce navigateur.';
+            errorMsg.style.display = 'block';
+            return;
+        }
         document.getElementById('admin-login-overlay').style.display = 'none';
         chargerDonneesAdmin();
     } else {
@@ -35,12 +122,16 @@ function tentativeConnexionAdmin() {
 }
 
 function deconnecterAdmin() {
-    localStorage.removeItem('sessionAdminActive');
+    if (!supprimerStockageSecurise('sessionAdminActive')) {
+        alert('Impossible de fermer la session : le stockage local est bloqué.');
+        return;
+    }
     window.location.href = "index.html";
 }
 
 // 2. GESTION DES ONGLETS
 function changerOngletStatut(nouveauStatut) {
+    if (!['en-attente', 'confirmee', 'annulee', 'tous'].includes(nouveauStatut)) return;
     statutFiltreActif = nouveauStatut;
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.status === nouveauStatut);
@@ -50,11 +141,24 @@ function changerOngletStatut(nouveauStatut) {
 
 // 3. CHARGEMENT ET RENDU DU TABLEAU DE BORD
 function chargerDonneesAdmin() {
-    if (typeof genererCalendrier === 'function') {
-        genererCalendrier();
-    }
+    return chargerReservationsFirestore().then(reservations => {
+        if (typeof genererCalendrier === 'function') {
+            genererCalendrier();
+        }
+        afficherDonneesAdmin(reservations);
+        return true;
+    }).catch(error => {
+        afficherErreurChargementReservations(error);
+        return false;
+    });
+}
 
-    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+function afficherDonneesAdmin(reservations) {
+    if (!Array.isArray(reservations)) {
+        const resBody = document.getElementById('admin-res-body');
+        if (resBody) resBody.textContent = 'Les données des réservations Firebase sont invalides.';
+        return;
+    }
 
     // A. Compteurs d'onglets
     const nbAttente = reservations.filter(r => r.statut === 'en-attente').length;
@@ -80,7 +184,9 @@ function chargerDonneesAdmin() {
     }
 
     if (filtreLogement !== 'tous') {
-        listeFiltree = listeFiltree.filter(r => (r.logement || '').includes(filtreLogement));
+        listeFiltree = listeFiltree.filter(r =>
+            typeof r.logement === 'string' && r.logement.includes(filtreLogement)
+        );
     }
 
     // C. Tri par date d'arrivée
@@ -100,21 +206,31 @@ function chargerDonneesAdmin() {
         } else {
             resBody.innerHTML = listeFiltree.map(res => {
                 const estManuel = res.source === 'manuel';
+                const reservationId = typeof res.id === 'string' ? echapperHTML(res.id) : '';
+                const actionsPermises = reservationId.length > 0;
+                const nom = echapperHTML(res.nom || '');
+                const email = echapperHTML(res.email || '');
+                const telephoneBrut = typeof res.telephone === 'string' ? res.telephone : '';
+                const telephone = echapperHTML(telephoneBrut);
+                const logement = echapperHTML(res.logement || 'Domaine complet');
+                const dateArrivee = echapperHTML(res.dateArrivee || '');
+                const dateDepart = echapperHTML(res.dateDepart || '');
+                const message = echapperHTML(res.message || '');
 
                 // Colonne Client / Origine
                 let colonneClient = '';
                 if (estManuel) {
                     colonneClient = `
                         <span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">BLOQUÉ HÔTE</span><br>
-                        <strong>${res.nom}</strong>
-                        ${res.telephone ? `<br><small style="color:#0284c7;"><a href="tel:${res.telephone}" style="color:inherit; text-decoration:none;">📞 ${res.telephone}</a></small>` : ''}
-                        ${res.email && res.email !== 'proprietaire@gite-sailly.fr' ? `<br><small style="color:#64748b;">✉️ ${res.email}</small>` : ''}
+                        <strong>${nom}</strong>
+                        ${estTelephoneValide(telephoneBrut) ? `<br><small style="color:#0284c7;"><a href="tel:${telephone}" style="color:inherit; text-decoration:none;">📞 ${telephone}</a></small>` : ''}
+                        ${res.email && res.email !== 'proprietaire@gite-sailly.fr' ? `<br><small style="color:#64748b;">✉️ ${email}</small>` : ''}
                     `;
                 } else {
                     colonneClient = `
-                        <strong>${res.nom}</strong><br>
-                        <small style="color: #64748b;">${res.email}</small>
-                        ${res.telephone ? `<br><small style="color:#0284c7;"><a href="tel:${res.telephone}" style="color:inherit; text-decoration:none;">📞 ${res.telephone}</a></small>` : ''}
+                        <strong>${nom}</strong><br>
+                        <small style="color: #64748b;">${email}</small>
+                        ${estTelephoneValide(telephoneBrut) ? `<br><small style="color:#0284c7;"><a href="tel:${telephone}" style="color:inherit; text-decoration:none;">📞 ${telephone}</a></small>` : ''}
                     `;
                 }
 
@@ -129,26 +245,30 @@ function chargerDonneesAdmin() {
                 }
 
                 // Boutons d'actions sécurisés avec anti-missclick
-                let actionsHtml = `
-                    <button class="btn-action" style="background:#e2e8f0; color:#334155;" title="Modifier ou ajouter des informations" onclick="ouvrirModalEdition(${res.id})">✏️ Infos</button>
-                `;
+                let actionsHtml = '';
 
-                if (estManuel) {
+                if (actionsPermises) {
+                    actionsHtml = `
+                    <button class="btn-action" data-action="edit" data-id="${reservationId}" style="background:#e2e8f0; color:#334155;" title="Modifier ou ajouter des informations">✏️ Infos</button>
+                `;
+                }
+
+                if (actionsPermises && estManuel) {
                     actionsHtml += `
-                        <button class="btn-action btn-suppr" onclick="supprimerReservation(${res.id})">Débloquer</button>
+                        <button class="btn-action btn-suppr" data-action="delete" data-id="${reservationId}">Débloquer</button>
                     `;
-                } else if (res.statut === 'confirmee') {
+                } else if (actionsPermises && res.statut === 'confirmee') {
                     actionsHtml += `
-                        <button class="btn-action btn-refuser" onclick="demanderRefus(${res.id})">Annuler séjour</button>
+                        <button class="btn-action btn-refuser" data-action="refuse" data-id="${reservationId}">Annuler séjour</button>
                     `;
-                } else if (res.statut === 'annulee') {
+                } else if (actionsPermises && res.statut === 'annulee') {
                     actionsHtml += `
-                        <button class="btn-action btn-suppr" onclick="supprimerReservation(${res.id})">Retirer</button>
+                        <button class="btn-action btn-suppr" data-action="delete" data-id="${reservationId}">Retirer</button>
                     `;
-                } else {
+                } else if (actionsPermises) {
                     actionsHtml += `
-                        <button class="btn-action btn-valider" onclick="demanderValidation(${res.id})">Valider</button>
-                        <button class="btn-action btn-refuser" onclick="demanderRefus(${res.id})">Refuser</button>
+                        <button class="btn-action btn-valider" data-action="validate" data-id="${reservationId}">Valider</button>
+                        <button class="btn-action btn-refuser" data-action="refuse" data-id="${reservationId}">Refuser</button>
                     `;
                 }
 
@@ -156,7 +276,7 @@ function chargerDonneesAdmin() {
                 if (res.motifAnnulation) {
                     motifBloc = `
                         <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px; background: #fef2f2; padding: 4px 8px; border-radius: 4px;">
-                            <strong>Motif :</strong> ${res.motifAnnulation}
+                            <strong>Motif :</strong> ${echapperHTML(res.motifAnnulation)}
                         </div>
                     `;
                 }
@@ -165,15 +285,15 @@ function chargerDonneesAdmin() {
                     <tr>
                         <td>${colonneClient}</td>
                         <td>
-                            <span class="logement-tag">${res.logement || 'Domaine complet'}</span>
+                            <span class="logement-tag">${logement}</span>
                         </td>
                         <td>
-                            Du <strong>${res.dateArrivee}</strong><br>
-                            au <strong>${res.dateDepart}</strong>
+                            Du <strong>${dateArrivee}</strong><br>
+                            au <strong>${dateDepart}</strong>
                             ${motifBloc}
                         </td>
                         <td style="font-size: 0.85rem; color: #475569; max-width: 220px;">
-                            ${res.message ? `<em>« ${res.message} »</em>` : '-'}
+                            ${message ? `<em>« ${message} »</em>` : '-'}
                         </td>
                         <td>${badgeHtml}</td>
                         <td>
@@ -188,23 +308,29 @@ function chargerDonneesAdmin() {
     }
 
     // E. Utilisateurs enregistrés
-    const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
+    const resultatUtilisateurs = lireJSONSecurise('utilisateurs', []);
+    const utilisateurs = resultatUtilisateurs.valeur;
     const usersBody = document.getElementById('admin-users-body');
     if (usersBody) {
+        if (!resultatUtilisateurs.ok || !Array.isArray(utilisateurs) ||
+            utilisateurs.some(utilisateur => !utilisateur || typeof utilisateur !== 'object' || Array.isArray(utilisateur))) {
+            usersBody.textContent = 'Impossible de lire les utilisateurs : stockage local indisponible ou données invalides.';
+            return;
+        }
         if (utilisateurs.length === 0) {
             usersBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color:#94a3b8;">Aucun utilisateur inscrit</td></tr>';
         } else {
             usersBody.innerHTML = utilisateurs.map(u => `
                 <tr>
-                    <td><strong>${u.nom}</strong></td>
-                    <td>${u.email}</td>
+                    <td><strong>${echapperHTML(u.nom || '')}</strong></td>
+                    <td>${echapperHTML(u.email || '')}</td>
                     <td>
                         <span class="badge ${u.actif ? 'badge-valide' : 'badge-attente'}">
                             ${u.actif ? 'Vérifié' : 'Non vérifié'}
                         </span>
                     </td>
-                    <td>${u.telephone ? `<a href="tel:${u.telephone}">${u.telephone}</a>` : '-'}</td>
-                    <td>${new Date(u.dateInscription).toLocaleDateString()}</td>
+                    <td>${estTelephoneValide(u.telephone || '') ? `<a href="tel:${echapperHTML(u.telephone)}">${echapperHTML(u.telephone)}</a>` : '-'}</td>
+                    <td>${echapperHTML(u.dateInscription ? new Date(u.dateInscription).toLocaleDateString() : '')}</td>
                 </tr>
             `).join('');
         }
@@ -212,16 +338,23 @@ function chargerDonneesAdmin() {
 }
 
 // 4. BLOQUER DES DATES MANUELLEMENT (Airbnb, Téléphone, Travaux)
-function bloquerDatesManuel(e) {
+async function bloquerDatesManuel(e) {
     e.preventDefault();
 
     const logement = document.getElementById('blocage-logement').value;
     const dateArrivee = document.getElementById('blocage-arrivee').value;
     const dateDepart = document.getElementById('blocage-depart').value;
     const motif = document.getElementById('blocage-motif').value;
+    const logementsAutorises = ["Domaine complet", "La Bergerie", "L'Écurie", "L'Étable", "Le Pigeonnier", "Le Grenier"];
+    const motifsAutorises = Array.from(document.getElementById('blocage-motif').options, option => option.value);
 
-    if (!dateArrivee || !dateDepart) {
-        alert("Veuillez renseigner les deux dates.");
+    if (!logementsAutorises.includes(logement) || !motifsAutorises.includes(motif)) {
+        alert('Le logement ou le motif sélectionné est invalide.');
+        return;
+    }
+
+    if (!estDateISOValide(dateArrivee) || !estDateISOValide(dateDepart)) {
+        alert("Veuillez renseigner deux dates valides.");
         return;
     }
 
@@ -230,17 +363,20 @@ function bloquerDatesManuel(e) {
         return;
     }
 
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+    let reservations = lireReservationsAdmin();
+    if (!reservations) return;
 
     const conflit = reservations.some(r => {
         if (r.statut === 'annulee') return false;
 
-        const memeLogement = (r.logement === logement) || 
-                             (r.logement === 'Domaine complet') || 
+        const logementReservation = typeof r.logement === 'string' ? r.logement : '';
+        const memeLogement = (logementReservation === logement) ||
+                             (logementReservation === 'Domaine complet') ||
                              (logement === 'Domaine complet');
 
         if (!memeLogement) return false;
-        return (dateArrivee < r.dateDepart && dateDepart > r.dateArrivee);
+        return typeof r.dateArrivee === 'string' && typeof r.dateDepart === 'string' &&
+            (dateArrivee < r.dateDepart && dateDepart > r.dateArrivee);
     });
 
     if (conflit) {
@@ -248,32 +384,45 @@ function bloquerDatesManuel(e) {
         if (!continuer) return;
     }
 
-    const nouveauBlocage = {
-        id: Date.now(),
-        nom: `Bloqué (${motif})`,
-        email: "proprietaire@gite-sailly.fr",
-        telephone: "",
-        logement: logement,
-        dateArrivee: dateArrivee,
-        dateDepart: dateDepart,
-        message: `Créneau verrouillé manuellement : ${motif}`,
-        statut: "confirmee",
-        source: "manuel",
-        dateCreation: new Date().toISOString()
-    };
+    try {
+        await initialiserFirestoreAdmin();
+        const referenceBlocage = firestoreAdmin.doc(
+            firestoreAdmin.collection(dbAdmin, 'reservations')
+        );
+        const nouveauBlocage = {
+            nom: `Bloqué (${motif})`,
+            email: "proprietaire@gite-sailly.fr",
+            telephone: "",
+            logement: logement,
+            dateArrivee: dateArrivee,
+            dateDepart: dateDepart,
+            message: `Créneau verrouillé manuellement : ${motif}`,
+            statut: "confirmee",
+            source: "manuel",
+            dateCreation: new Date().toISOString()
+        };
 
-    reservations.push(nouveauBlocage);
-    localStorage.setItem('reservations', JSON.stringify(reservations));
+        await firestoreAdmin.setDoc(referenceBlocage, nouveauBlocage);
+        reservationsAdmin.push({ ...nouveauBlocage, id: referenceBlocage.id });
+    } catch (error) {
+        console.error('Erreur lors de l’enregistrement du blocage Firestore:', error);
+        alert('Impossible d’enregistrer ce blocage dans Firebase. Vérifiez votre connexion et les règles Firestore.');
+        return;
+    }
 
     document.getElementById('form-bloquer-dates').reset();
-    chargerDonneesAdmin();
+    if (!await chargerDonneesAdmin()) {
+        alert('Le blocage a été enregistré dans Firebase, mais le calendrier n’a pas pu être actualisé. Rechargez la page.');
+        return;
+    }
 
     alert(`Période verrouillée du ${dateArrivee} au ${dateDepart} pour ${logement}. Le calendrier est actualisé.`);
 }
 
 // 5. VALIDATION SÉCURISÉE (ANTI-MISSCLICK) & REFUS GUIDÉ
-function demanderValidation(id) {
-    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+async function demanderValidation(id) {
+    const reservations = lireReservationsAdmin();
+    if (!reservations) return;
     const res = reservations.find(r => r.id === id);
     if (!res) return;
 
@@ -284,18 +433,19 @@ function demanderValidation(id) {
         `👉 Un courriel de confirmation avec consignes sera envoyé à ${res.email}.`;
 
     if (confirm(messageConfirmation)) {
-        executerChangementStatut(id, 'confirmee');
+        await executerChangementStatut(id, 'confirmee');
     }
 }
 
-function demanderRefus(id) {
-    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+async function demanderRefus(id) {
+    const reservations = lireReservationsAdmin();
+    if (!reservations) return;
     const res = reservations.find(r => r.id === id);
     if (!res) return;
 
     document.getElementById('refus-res-id').value = res.id;
-    document.getElementById('refus-recap-text').innerHTML = 
-        `Demande de <strong>${res.nom}</strong> pour <strong>${res.logement || 'Domaine complet'}</strong> (du ${res.dateArrivee} au ${res.dateDepart}).`;
+    document.getElementById('refus-recap-text').textContent =
+        `Demande de ${res.nom || ''} pour ${res.logement || 'Domaine complet'} (du ${res.dateArrivee || ''} au ${res.dateDepart || ''}).`;
 
     const select = document.getElementById('refus-select-motif');
     select.selectedIndex = 0;
@@ -318,34 +468,33 @@ function fermerModalRefus() {
     document.getElementById('modal-refus-reservation').style.display = 'none';
 }
 
-function confirmerRefusReservation(e) {
+async function confirmerRefusReservation(e) {
     e.preventDefault();
-    const id = Number(document.getElementById('refus-res-id').value);
+    const id = document.getElementById('refus-res-id').value;
     const motif = document.getElementById('refus-message-client').value.trim();
 
-    if (!motif) {
-        alert("Veuillez indiquer un motif avant de valider l'annulation.");
+    if (!motif || motif.length > 500 || contientContenuDangereux(motif)) {
+        alert("Veuillez saisir un motif valide (500 caractères maximum, sans balisage HTML).");
         return;
     }
 
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    let reservationRefusee = null;
+    const reservation = lireReservationsAdmin().find(r => r.id === id);
+    if (!reservation) return;
+    const reservationRefusee = {
+        ...reservation,
+        statut: 'annulee',
+        motifAnnulation: motif
+    };
 
-    reservations = reservations.map(r => {
-        if (r.id === id) {
-            reservationRefusee = {
-                ...r,
-                statut: 'annulee',
-                motifAnnulation: motif
-            };
-            return reservationRefusee;
-        }
-        return r;
-    });
-
-    localStorage.setItem('reservations', JSON.stringify(reservations));
+    try {
+        await enregistrerReservationFirestore(reservationRefusee);
+    } catch (error) {
+        console.error('Erreur lors de l’annulation Firestore:', error);
+        alert('Impossible d’enregistrer l’annulation dans Firebase. Veuillez réessayer.');
+        return;
+    }
     fermerModalRefus();
-    chargerDonneesAdmin();
+    await chargerDonneesAdmin();
 
     // Envoi de l'e-mail explicatif au client s'il s'agit d'une vraie réservation client
     if (reservationRefusee && reservationRefusee.source !== 'manuel' && reservationRefusee.email) {
@@ -355,20 +504,18 @@ function confirmerRefusReservation(e) {
     }
 }
 
-function executerChangementStatut(id, nouveauStatut) {
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    let reservationConcernee = null;
-
-    reservations = reservations.map(res => {
-        if (res.id === id) {
-            reservationConcernee = { ...res, statut: nouveauStatut };
-            return reservationConcernee;
-        }
-        return res;
-    });
-
-    localStorage.setItem('reservations', JSON.stringify(reservations));
-    chargerDonneesAdmin();
+async function executerChangementStatut(id, nouveauStatut) {
+    const reservation = lireReservationsAdmin().find(res => res.id === id);
+    if (!reservation) return;
+    const reservationConcernee = { ...reservation, statut: nouveauStatut };
+    try {
+        await enregistrerReservationFirestore(reservationConcernee);
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut Firestore:', error);
+        alert('Impossible d’enregistrer ce changement dans Firebase. Veuillez réessayer.');
+        return;
+    }
+    await chargerDonneesAdmin();
 
     if (nouveauStatut === 'confirmee' && reservationConcernee && reservationConcernee.source !== 'manuel') {
         envoyerEmailConfirmationClient(reservationConcernee);
@@ -377,7 +524,8 @@ function executerChangementStatut(id, nouveauStatut) {
 
 // 6. MODALE D'ÉDITION DES DÉTAILS DU SÉJOUR
 function ouvrirModalEdition(id) {
-    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+    const reservations = lireReservationsAdmin();
+    if (!reservations) return;
     const res = reservations.find(r => r.id === id);
     if (!res) return;
 
@@ -394,51 +542,99 @@ function fermerModalEdition() {
     document.getElementById('modal-edit-reservation').style.display = 'none';
 }
 
-function sauvegarderDetailsEdition(e) {
+async function sauvegarderDetailsEdition(e) {
     e.preventDefault();
-    const id = Number(document.getElementById('edit-res-id').value);
+    const id = document.getElementById('edit-res-id').value;
     const nom = document.getElementById('edit-res-nom').value.trim();
     const tel = document.getElementById('edit-res-tel').value.trim();
     const email = document.getElementById('edit-res-email').value.trim();
     const notes = document.getElementById('edit-res-notes').value.trim();
 
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    reservations = reservations.map(r => {
-        if (r.id === id) {
-            return {
-                ...r,
-                nom: nom || r.nom,
-                telephone: tel,
-                email: email || r.email,
-                message: notes
-            };
-        }
-        return r;
-    });
+    if (nom.length > 100 || contientContenuDangereux(nom) ||
+        (tel && (!estTelephoneValide(tel) || tel.length > 25)) ||
+        (email && !estEmailValide(email)) ||
+        notes.length > 1000 || contientContenuDangereux(notes)) {
+        alert('Vérifiez les informations : nom (100), téléphone valide, e-mail valide et notes (1 000 caractères maximum, sans balisage HTML).');
+        return;
+    }
 
-    localStorage.setItem('reservations', JSON.stringify(reservations));
+    const reservation = lireReservationsAdmin().find(r => r.id === id);
+    if (!reservation) return;
+    const reservationModifiee = {
+        ...reservation,
+        nom: nom || reservation.nom,
+        telephone: tel,
+        email: email || reservation.email,
+        message: notes
+    };
+
+    try {
+        await enregistrerReservationFirestore(reservationModifiee);
+    } catch (error) {
+        console.error('Erreur lors de la modification de la réservation Firestore:', error);
+        alert('Impossible d’enregistrer les modifications dans Firebase. Veuillez réessayer.');
+        return;
+    }
     fermerModalEdition();
-    chargerDonneesAdmin();
+    await chargerDonneesAdmin();
 }
 
 // 7. SUPPRESSION D'UNE ENTRÉE (Déblocage ou retrait du tableau)
-function supprimerReservation(id) {
+async function supprimerReservation(id) {
     if (!confirm("Voulez-vous retirer définitivement cette entrée ?")) return;
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    reservations = reservations.filter(res => res.id !== id);
-    localStorage.setItem('reservations', JSON.stringify(reservations));
-    chargerDonneesAdmin();
+    try {
+        await initialiserFirestoreAdmin();
+        await firestoreAdmin.deleteDoc(
+            firestoreAdmin.doc(dbAdmin, 'reservations', id)
+        );
+        reservationsAdmin = reservationsAdmin.filter(reservation => reservation.id !== id);
+        await chargerDonneesAdmin();
+    } catch (error) {
+        console.error('Erreur lors de la suppression Firestore:', error);
+        alert('Impossible de supprimer cette entrée dans Firebase. Veuillez réessayer.');
+    }
 }
 
 // 8. ENVOI COURRIELS VIA EMAILJS (UTILISATION DU TEMPLATE CLIENT template_8ng5jpb)
 
+function envoyerEmailJSAdmin(templateParams) {
+    if (!window.emailjs || typeof window.emailjs.send !== 'function') {
+        return Promise.reject(new Error('Le SDK EmailJS est indisponible.'));
+    }
+    if (!templateParams || !estEmailValide(templateParams.email_destinataire)) {
+        return Promise.reject(new Error('Adresse e-mail destinataire invalide.'));
+    }
+    const valeurs = Object.values(templateParams);
+    if (valeurs.some(valeur =>
+        typeof valeur !== 'string' ||
+        valeur.length > 2000 ||
+        contientContenuDangereux(valeur)
+    )) {
+        return Promise.reject(new Error('Les données destinées au modèle EmailJS sont invalides.'));
+    }
+    if (Date.now() - dernierEnvoiEmailAdmin < DELAI_ENTRE_EMAILS_ADMIN) {
+        return Promise.reject(new Error('Veuillez patienter avant le prochain envoi.'));
+    }
+
+    dernierEnvoiEmailAdmin = Date.now();
+    return window.emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams);
+}
+
 // A. Validation du séjour
 function envoyerEmailConfirmationClient(res) {
+    if (!res || !estEmailValide(res.email) ||
+        typeof res.nom !== 'string' || res.nom.length > 100 || contientContenuDangereux(res.nom) ||
+        typeof res.logement !== 'string' || res.logement.length > 100 || contientContenuDangereux(res.logement) ||
+        !estDateISOValide(res.dateArrivee) || !estDateISOValide(res.dateDepart)) {
+        alert('Impossible d’envoyer la confirmation : les données de réservation sont invalides.');
+        return;
+    }
+
     const detailsArrivee = `Votre demande pour le logement "${res.logement || 'Domaine complet'}" du ${res.dateArrivee} au ${res.dateDepart} est validée ! Arrivée à partir de 16h00 au 2 rue Saint-Jean, 62111 Sailly-au-Bois. Stationnement gratuit dans la cour.`;
 
     const templateParams = {
         email_destinataire: res.email,
-        sujet: "Confirmation de votre séjour — Gîte de Sailly-au-Bois 🌿",
+        sujet: "Confirmation de votre séjour — Une étape à Sailly-Au-Bois 🌿",
         to_name: res.nom || "Client",
         message_intro: detailsArrivee,
         action_button_text: "Consulter mon espace client",
@@ -446,7 +642,7 @@ function envoyerEmailConfirmationClient(res) {
         message_outro: "Pour toute question ou demande particulière avant votre arrivée, n'hésitez pas à nous contacter."
     };
 
-    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
+    envoyerEmailJSAdmin(templateParams)
         .then(() => {
             alert(`✅ Réservation validée et e-mail envoyé à ${res.email}.`);
         })
@@ -458,11 +654,20 @@ function envoyerEmailConfirmationClient(res) {
 
 // B. Refus ou annulation du séjour par l'hôte
 function envoyerEmailRefusClient(res, motif) {
+    if (!res || !estEmailValide(res.email) ||
+        typeof res.nom !== 'string' || res.nom.length > 100 || contientContenuDangereux(res.nom) ||
+        typeof motif !== 'string' || !motif || motif.length > 500 || contientContenuDangereux(motif) ||
+        typeof res.logement !== 'string' || res.logement.length > 100 || contientContenuDangereux(res.logement) ||
+        !estDateISOValide(res.dateArrivee) || !estDateISOValide(res.dateDepart)) {
+        alert('Impossible d’envoyer le message : les données de réservation ou le motif sont invalides.');
+        return;
+    }
+
     const messageRefus = `Nous ne pouvons malheureusement pas donner une suite favorable à votre demande de réservation pour "${res.logement || 'Domaine complet'}" aux dates du ${res.dateArrivee} au ${res.dateDepart}.\n\nMotif communiqué par l'hôte : « ${motif} »`;
 
     const templateParams = {
         email_destinataire: res.email,
-        sujet: "Information concernant votre réservation — Gîte de Sailly-au-Bois",
+        sujet: "Information concernant votre réservation — Une étape à Sailly-Au-Bois",
         to_name: res.nom || "Client",
         message_intro: messageRefus,
         action_button_text: "Choisir d'autres dates",
@@ -470,7 +675,7 @@ function envoyerEmailRefusClient(res, motif) {
         message_outro: "Nous restons à votre entière disposition pour tout autre séjour ou renseignement."
     };
 
-    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
+    envoyerEmailJSAdmin(templateParams)
         .then(() => {
             alert(`Réservation annulée. Un courriel explicatif a été envoyé à ${res.email}.`);
         })

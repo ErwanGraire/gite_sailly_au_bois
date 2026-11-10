@@ -1,6 +1,6 @@
 # Gîte Sailly-au-Bois
 
-Site de réservation pour le gîte de Sailly-au-Bois aux Hauts-de-France avec gestion des réservations et blocage de dates.
+Site de réservation pour le Une étape à Sailly-Au-Bois aux Hauts-de-France avec gestion des réservations et blocage de dates.
 
 ## 📋 Structure du projet
 
@@ -166,6 +166,8 @@ Pour ajouter une réservation, modifiez le fichier `reservations.json` :
 - Les réservations sont stockées dans `reservations.json`
 - Pour une solution production, utilisez une vraie base de données
 - Les dates sont au format ISO (YYYY-MM-DD)
+
+> **Limite de sécurité :** l’authentification, les mots de passe et les sessions stockés côté navigateur ne protègent pas un compte ni l’espace administrateur. Les identifiants et le code exécuté dans le navigateur peuvent être inspectés ou modifiés. Pour un déploiement réel, déplacez l’authentification, les données et la limitation des envois EmailJS vers un serveur; limitez aussi les domaines autorisés et les quotas dans EmailJS.
 
 ## 🧪 Test rapide
 

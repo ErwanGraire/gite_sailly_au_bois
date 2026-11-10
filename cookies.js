@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initCookieConsent() {
     // Vérifier si l'utilisateur a déjà fait un choix
-    const consent = localStorage.getItem('site_cookie_consent');
-    if (consent) return; // Choix déjà enregistré, pas de bannière
+    const resultatConsentement = lireStockageSecurise('site_cookie_consent');
+    if (resultatConsentement.ok && resultatConsentement.valeur) return;
 
     // Création dynamique du bandeau
     const banner = document.createElement('div');
@@ -31,14 +31,24 @@ function initCookieConsent() {
 
     // Événements
     document.getElementById('btn-cookie-accept').addEventListener('click', () => {
-        localStorage.setItem('site_cookie_consent', 'accepted');
-        masquerBanniere();
+        enregistrerConsentementCookie('accepted');
     });
 
     document.getElementById('btn-cookie-refuse').addEventListener('click', () => {
-        localStorage.setItem('site_cookie_consent', 'essential_only');
-        masquerBanniere();
+        enregistrerConsentementCookie('essential_only');
     });
+}
+
+function enregistrerConsentementCookie(consentement) {
+    if (ecrireStockageSecurise('site_cookie_consent', consentement)) {
+        masquerBanniere();
+        return;
+    }
+
+    const texte = document.querySelector('#cookie-banner .cookie-text p');
+    if (texte) {
+        texte.textContent = 'Votre navigateur bloque le stockage local ; votre choix ne peut pas être mémorisé. Vous pouvez continuer à utiliser le site.';
+    }
 }
 
 function masquerBanniere() {

@@ -1,26 +1,38 @@
 let filtreActifClient = 'validees';
+let dernierEmailCompte = 0;
+const DELAI_EMAIL_COMPTE_MS = 10000;
 
 document.addEventListener('DOMContentLoaded', function() {
-    chargerProfilEtReservations();
-
-    const uploadInput = document.getElementById('upload-photo');
-    if (uploadInput) {
-        uploadInput.addEventListener('change', gererChangementPhoto);
-    }
+    window.firebaseAuthReady.then(() => {
+        chargerProfilEtReservations();
+        const uploadInput = document.getElementById('upload-photo');
+        if (uploadInput) uploadInput.addEventListener('change', gererChangementPhoto);
+    }).catch(error => {
+        console.error('Impossible de charger la session du compte:', error);
+        alert('Impossible de vérifier votre session. Veuillez réessayer.');
+    });
 });
 
 function recupererEmailActif() {
-    const raw = localStorage.getItem('utilisateurConnecte');
-    if (!raw) return null;
+    const utilisateur = obtenirUtilisateurConnecte();
+    const email = utilisateur && utilisateur.email;
+    return typeof email === 'string' && estEmailValide(email) ? email.trim().toLowerCase() : null;
+}
 
-    try {
-        const obj = JSON.parse(raw);
-        if (obj && typeof obj === 'object' && obj.email) {
-            return obj.email.trim().toLowerCase();
-        }
-    } catch (e) {}
+function lireTableauCompte(cle) {
+    const resultat = lireJSONSecurise(cle, []);
+    if (!resultat.ok || !Array.isArray(resultat.valeur) ||
+        resultat.valeur.some(element => !element || typeof element !== 'object' || Array.isArray(element))) {
+        alert('Impossible de lire les données : stockage local indisponible ou données invalides.');
+        return null;
+    }
+    return resultat.valeur;
+}
 
-    return raw.replace(/['"]+/g, '').trim().toLowerCase();
+function enregistrerTableauCompte(cle, valeur) {
+    if (ecrireJSONSecurise(cle, valeur)) return true;
+    alert('Impossible d’enregistrer les changements : stockage local indisponible ou plein.');
+    return false;
 }
 
 function changerFiltreClient(onglet) {
@@ -32,15 +44,47 @@ function changerFiltreClient(onglet) {
 }
 
 // 1. CHARGEMENT DU PROFIL ET DES SÉJOURS ORGANISÉS
-function chargerProfilEtReservations() {
+async function chargerProfilEtReservations() {
+    try {
+        await window.firebaseAuthReady;
+    } catch (error) {
+        console.error('Impossible de vérifier la session Firebase:', error);
+        alert('Impossible de charger votre compte. Veuillez réessayer.');
+        return;
+    }
+
+    const utilisateurFirebase = window.firebaseAuth.currentUser;
     const emailConnecte = recupererEmailActif();
-    if (!emailConnecte) {
+    if (!emailConnecte || !utilisateurFirebase) {
         window.location.href = 'auth.html';
         return;
     }
 
-    const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-    const utilisateur = utilisateurs.find(u => (u.email || '').trim().toLowerCase() === emailConnecte);
+    const reservationsToutes = lireTableauCompte('reservations');
+    if (!reservationsToutes) return;
+
+    let profil = {};
+    try {
+        const [{ db }, firestoreSdk] = await Promise.all([
+            import('./firebase-config.js'),
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+        ]);
+        const profilSnapshot = await firestoreSdk.getDoc(
+            firestoreSdk.doc(db, 'users', utilisateurFirebase.uid)
+        );
+        if (profilSnapshot.exists()) profil = profilSnapshot.data();
+    } catch (error) {
+        console.error('Impossible de charger le profil Firestore:', error);
+        alert('Impossible de charger vos informations de profil. Veuillez réessayer.');
+        return;
+    }
+    const utilisateur = {
+        ...profil,
+        nom: profil.nomComplet || [profil.prenom, profil.nom].filter(Boolean).join(' '),
+        email: utilisateurFirebase.email,
+        emailVerified: utilisateurFirebase.emailVerified
+    };
+    window.actualiserProfilFirebase(utilisateur);
 
     // Profil
     const inputNom = document.getElementById('edit-nom');
@@ -53,19 +97,25 @@ function chargerProfilEtReservations() {
     if (textEmail) textEmail.textContent = emailConnecte;
 
     if (utilisateur) {
-        if (inputNom) inputNom.value = utilisateur.nom || '';
+        if (inputNom)         inputNom.value = typeof utilisateur.nom === 'string' ? utilisateur.nom : '';
         if (inputTel) {
-            inputTel.value = (utilisateur.telephone && !utilisateur.telephone.includes('@')) ? utilisateur.telephone : '';
+            inputTel.value = (typeof utilisateur.telephone === 'string' && !utilisateur.telephone.includes('@')) ? utilisateur.telephone : '';
         }
         if (avatar) {
-            if (utilisateur.photo) {
-                avatar.innerHTML = `<img src="${utilisateur.photo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" alt="Avatar">`;
+            if (typeof utilisateur.photo === 'string' &&
+                utilisateur.photo.length <= 1400000 &&
+                /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(utilisateur.photo)) {
+                const image = document.createElement('img');
+                image.src = utilisateur.photo;
+                image.style.cssText = 'width:100%; height:100%; border-radius:50%; object-fit:cover;';
+                image.alt = 'Avatar';
+                avatar.replaceChildren(image);
             } else {
-                avatar.textContent = (utilisateur.nom || 'U').charAt(0).toUpperCase();
+                avatar.textContent = (typeof utilisateur.nom === 'string' && utilisateur.nom ? utilisateur.nom : 'U').charAt(0).toUpperCase();
             }
         }
         if (badgeStatut) {
-            if (utilisateur.actif) {
+            if (utilisateur.emailVerified) {
                 badgeStatut.innerHTML = '<span class="badge badge-valide">Vérifié</span>';
                 if (zoneVerification) zoneVerification.style.display = 'none';
             } else {
@@ -76,9 +126,8 @@ function chargerProfilEtReservations() {
     }
 
     // Réservations de l'utilisateur
-    const reservationsToutes = JSON.parse(localStorage.getItem('reservations') || '[]');
     const mesReservations = reservationsToutes.filter(r => 
-        (r.email || '').trim().toLowerCase() === emailConnecte
+        typeof r.email === 'string' && r.email.trim().toLowerCase() === emailConnecte
     );
 
     // Tri par date d'arrivée la plus proche
@@ -115,6 +164,12 @@ function chargerProfilEtReservations() {
     }
 
     conteneurListe.innerHTML = listeAffichee.map(res => {
+        const reservationId = Number(res.id);
+        const idValide = Number.isSafeInteger(reservationId);
+        const logement = echapperHTML(res.logement || 'Domaine complet');
+        const dateArrivee = echapperHTML(res.dateArrivee || '');
+        const dateDepart = echapperHTML(res.dateDepart || '');
+        const message = echapperHTML(res.message || '');
         const estValidee = res.statut === 'confirmee';
         const estAnnulee = res.statut === 'annulee';
 
@@ -124,21 +179,21 @@ function chargerProfilEtReservations() {
 
         if (estValidee) {
             badgeHtml = `<span class="badge badge-valide">● Séjour confirmé</span>`;
-            boutonInfos = `<button class="btn-action" style="background:#0f172a; color:white;" onclick="ouvrirModalSejour(${res.id})">🗝️ Consignes & Arrivée</button>`;
-            boutonAction = `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${res.id})">Annuler le séjour</button>`;
+            boutonInfos = idValide ? `<button class="btn-action" style="background:#0f172a; color:white;" onclick="ouvrirModalSejour(${reservationId})">🗝️ Consignes & Arrivée</button>` : '';
+            boutonAction = idValide ? `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${reservationId})">Annuler le séjour</button>` : '';
         } else if (estAnnulee) {
             badgeHtml = `<span class="badge badge-annule">● Annulée</span>`;
             boutonAction = `<span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Dossier clos</span>`;
         } else {
             badgeHtml = `<span class="badge badge-attente">● En attente de validation</span>`;
-            boutonAction = `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${res.id})">Annuler la demande</button>`;
+            boutonAction = idValide ? `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${reservationId})">Annuler la demande</button>` : '';
         }
 
         let motifBloc = '';
         if (res.motifAnnulation) {
             motifBloc = `
                 <div style="margin-top: 10px; background: #fef2f2; border-left: 3px solid #dc2626; padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; color: #b91c1c;">
-                    <strong>Motif :</strong> ${res.motifAnnulation}
+                    <strong>Motif :</strong> ${echapperHTML(res.motifAnnulation)}
                 </div>
             `;
         }
@@ -148,16 +203,16 @@ function chargerProfilEtReservations() {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
                     <div>
                         <span style="font-weight: 700; color: #2f855a; background: #eaf3ea; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; display: inline-block; margin-bottom: 6px;">
-                            ${res.logement || 'Domaine complet'}
+                            ${logement}
                         </span>
                         <h4 style="margin: 0; font-family: var(--serif); font-size: 1.1rem; color: #1e293b;">
-                            Du ${res.dateArrivee} au ${res.dateDepart}
+                            Du ${dateArrivee} au ${dateDepart}
                         </h4>
                     </div>
                     <div>${badgeHtml}</div>
                 </div>
 
-                ${res.message ? `<p style="font-size: 0.85rem; color: #64748b; margin: 8px 0; background: #f8fafc; padding: 8px 12px; border-radius: 6px;"><em>« ${res.message} »</em></p>` : ''}
+                ${message ? `<p style="font-size: 0.85rem; color: #64748b; margin: 8px 0; background: #f8fafc; padding: 8px 12px; border-radius: 6px;"><em>« ${message} »</em></p>` : ''}
                 ${motifBloc}
 
                 <div style="margin-top: 14px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
@@ -171,22 +226,24 @@ function chargerProfilEtReservations() {
 
 // 2. MODALE DÉTAILS, CONSIGNES & CONTACT HÔTE
 function ouvrirModalSejour(id) {
-    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+    const reservations = lireTableauCompte('reservations');
+    if (!reservations) return;
     const res = reservations.find(r => r.id === id);
     if (!res) return;
 
-    document.getElementById('modal-logement-titre').textContent = `Modalités — ${res.logement || 'Domaine complet'}`;
+    document.getElementById('modal-logement-titre').textContent =
+        `Modalités — ${res.logement || 'Domaine complet'}`;
 
     const contenu = document.getElementById('modal-sejour-contenu');
     contenu.innerHTML = `
         <div style="background: #f8fafc; border-radius: 10px; padding: 14px; margin-bottom: 18px; font-size: 0.9rem;">
-            <p style="margin: 3px 0;"><strong>Dates réservées :</strong> Du ${res.dateArrivee} au ${res.dateDepart}</p>
-            <p style="margin: 3px 0;"><strong>Hébergement :</strong> ${res.logement || 'Domaine complet'}</p>
+            <p style="margin: 3px 0;"><strong>Dates réservées :</strong> Du ${echapperHTML(res.dateArrivee || '')} au ${echapperHTML(res.dateDepart || '')}</p>
+            <p style="margin: 3px 0;"><strong>Hébergement :</strong> ${echapperHTML(res.logement || 'Domaine complet')}</p>
         </div>
 
         <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #0f172a;">📍 Adresse & Accès</h4>
         <p style="font-size: 0.88rem; color: #475569; margin: 0 0 14px 0; line-height: 1.5;">
-            Gîte de Sailly-au-Bois<br>
+            Une étape à Sailly-Au-Bois<br>
             Face à l'église Saint-Sulpice, 62111 Sailly-au-Bois<br>
             🚗 Stationnement gratuit disponible sur place.
         </p>
@@ -221,32 +278,37 @@ function fermerModalSejour() {
 }
 
 // 3. MODIFICATION DU PROFIL
-function enregistrerModifications() {
-    const emailConnecte = recupererEmailActif();
+async function enregistrerModifications() {
     const inputNom = document.getElementById('edit-nom').value.trim();
     const inputTel = document.getElementById('edit-tel').value.trim();
 
-    if (!inputNom) {
-        afficherMessage('update-message', 'Le nom ne peut pas être vide.', '#c53030');
+    if (inputNom.length < 2 || inputNom.length > 100 ||
+        !/^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u.test(inputNom) ||
+        (inputTel && (!estTelephoneValide(inputTel) || inputTel.length > 25))) {
+        afficherMessage('update-message', 'Nom ou téléphone invalide.', '#c53030');
         return;
     }
 
-    let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-    utilisateurs = utilisateurs.map(u => {
-        if ((u.email || '').trim().toLowerCase() === emailConnecte) {
-            return { ...u, nom: inputNom, telephone: inputTel };
-        }
-        return u;
-    });
-
-    localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-    afficherMessage('update-message', 'Vos informations ont été enregistrées avec succès.', '#2e7d32');
-    chargerProfilEtReservations();
+    try {
+        const [{ db }, firestoreSdk] = await Promise.all([
+            import('./firebase-config.js'),
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+        ]);
+        await firestoreSdk.setDoc(
+            firestoreSdk.doc(db, 'users', window.firebaseAuth.currentUser.uid),
+            { nomComplet: inputNom, telephone: inputTel },
+            { merge: true }
+        );
+        afficherMessage('update-message', 'Vos informations ont été enregistrées avec succès.', '#2e7d32');
+        await chargerProfilEtReservations();
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du profil Firestore:', error);
+        afficherMessage('update-message', 'Impossible d’enregistrer vos informations. Veuillez réessayer.', '#c53030');
+    }
 }
 
 // 4. CHANGEMENT DE MOT DE PASSE
-function changerMotDePasse() {
-    const emailConnecte = recupererEmailActif();
+async function changerMotDePasse() {
     const ancienPass = document.getElementById('old-password').value;
     const nouveauPass = document.getElementById('new-password').value;
 
@@ -255,30 +317,27 @@ function changerMotDePasse() {
         return;
     }
 
-    if (nouveauPass.length < 6) {
-        afficherMessage('password-message', 'Le mot de passe doit comporter au moins 6 caractères.', '#c53030');
+    if (nouveauPass.length < 6 || nouveauPass.length > 128) {
+        afficherMessage('password-message', 'Le mot de passe doit comporter entre 6 et 128 caractères.', '#c53030');
         return;
     }
 
-    let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-    const user = utilisateurs.find(u => (u.email || '').trim().toLowerCase() === emailConnecte);
-
-    if (!user || user.password !== ancienPass) {
-        afficherMessage('password-message', 'L\'ancien mot de passe est incorrect.', '#c53030');
-        return;
+    try {
+        const authSdk = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+        const utilisateur = window.firebaseAuth.currentUser;
+        const identifiants = authSdk.EmailAuthProvider.credential(utilisateur.email, ancienPass);
+        await authSdk.reauthenticateWithCredential(utilisateur, identifiants);
+        await authSdk.updatePassword(utilisateur, nouveauPass);
+        document.getElementById('old-password').value = '';
+        document.getElementById('new-password').value = '';
+        afficherMessage('password-message', 'Mot de passe mis à jour avec succès.', '#2e7d32');
+    } catch (error) {
+        console.error('Erreur lors du changement de mot de passe Firebase:', error);
+        const message = error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password'
+            ? 'L’ancien mot de passe est incorrect.'
+            : 'Impossible de modifier le mot de passe. Veuillez vérifier vos informations et réessayer.';
+        afficherMessage('password-message', message, '#c53030');
     }
-
-    utilisateurs = utilisateurs.map(u => {
-        if ((u.email || '').trim().toLowerCase() === emailConnecte) {
-            return { ...u, password: nouveauPass };
-        }
-        return u;
-    });
-
-    localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-    document.getElementById('old-password').value = '';
-    document.getElementById('new-password').value = '';
-    afficherMessage('password-message', 'Mot de passe mis à jour avec succès.', '#2e7d32');
 }
 
 // 5. ANNULATION PAR LE CLIENT AVEC ALERTE HÔTE
@@ -286,7 +345,14 @@ function demanderAnnulation(resId) {
     const motif = prompt("Indiquez la raison de votre annulation pour l'hôte :");
     if (motif === null) return;
 
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+    const motifSaisi = motif.trim();
+    if (motifSaisi.length > 500 || contientContenuDangereux(motifSaisi)) {
+        alert('Le motif doit faire au maximum 500 caractères et ne pas contenir de balisage HTML.');
+        return;
+    }
+
+    let reservations = lireTableauCompte('reservations');
+    if (!reservations) return;
     let resAnnulee = null;
 
     reservations = reservations.map(r => {
@@ -294,14 +360,14 @@ function demanderAnnulation(resId) {
             resAnnulee = {
                 ...r,
                 statut: 'annulee',
-                motifAnnulation: motif.trim() || 'Annulé par le client'
+                motifAnnulation: motifSaisi || 'Annulé par le client'
             };
             return resAnnulee;
         }
         return r;
     });
 
-    localStorage.setItem('reservations', JSON.stringify(reservations));
+    if (!resAnnulee || !enregistrerTableauCompte('reservations', reservations)) return;
     chargerProfilEtReservations();
 
     if (resAnnulee) {
@@ -310,29 +376,34 @@ function demanderAnnulation(resId) {
 }
 
 function envoyerAlerteAnnulationHote(res) {
+    const nom = echapperHTML(res.nom || 'Client');
+    const email = echapperHTML(res.email || '');
+    const logement = echapperHTML(res.logement || 'Domaine complet');
+    const dateArrivee = echapperHTML(res.dateArrivee || '');
+    const dateDepart = echapperHTML(res.dateDepart || '');
     const blocMotif = `
         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 0.85rem; color: #ea580c;">
             <strong>Motif indiqué par le client :</strong><br>
-            <em>« ${res.motifAnnulation} »</em>
+            <em>« ${echapperHTML(res.motifAnnulation || '')} »</em>
         </div>
     `;
 
     const templateParams = {
         email_destinataire: "admin@gite-sailly.fr",
-        sujet: `🔔 Annulation séjour : ${res.nom} — ${res.logement || 'Domaine complet'}`,
+        sujet: `🔔 Annulation séjour : ${nom} — ${logement}`,
         titre_principal: "Un séjour a été annulé",
         couleur_titre: "#ea580c",
         name: "Propriétaire",
-        message_introduction: `Le client <strong>${res.nom}</strong> (${res.email}) a annulé sa réservation. Les dates ont été automatiquement libérées sur le calendrier :`,
-        logement: res.logement || "Domaine complet",
-        date_arrivee: res.dateArrivee,
-        date_depart: res.dateDepart,
+        message_introduction: `Le client <strong>${nom}</strong> (${email}) a annulé sa réservation. Les dates ont été automatiquement libérées sur le calendrier :`,
+        logement: logement,
+        date_arrivee: dateArrivee,
+        date_depart: dateDepart,
         bloc_info_supplementaire: blocMotif,
         lien_action: `${window.location.origin}/admin.html`,
         texte_bouton: "Consulter le planning"
     };
 
-    emailjs.send('service_p3hgn5k', 'template_dy98wud', templateParams)
+    envoyerEmailCompte(templateParams, 'template_dy98wud')
         .then(() => {
             alert("Votre séjour a bien été annulé. L'hôte en a été notifié par courriel.");
         })
@@ -346,49 +417,52 @@ function envoyerAlerteAnnulationHote(res) {
 function gererChangementPhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 500 * 1024) {
+        alert('Choisissez une image PNG, JPEG ou WebP de 500 Ko maximum.');
+        e.target.value = '';
+        return;
+    }
 
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = async function(evt) {
         const base64Photo = evt.target.result;
-        const emailConnecte = recupererEmailActif();
-        let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-
-        utilisateurs = utilisateurs.map(u => {
-            if ((u.email || '').trim().toLowerCase() === emailConnecte) {
-                return { ...u, photo: base64Photo };
-            }
-            return u;
-        });
-
-        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-        chargerProfilEtReservations();
+        if (typeof base64Photo !== 'string' ||
+            !/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(base64Photo)) {
+            alert('Le fichier image sélectionné est invalide.');
+            return;
+        }
+        try {
+            const [{ db }, firestoreSdk] = await Promise.all([
+                import('./firebase-config.js'),
+                import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+            ]);
+            await firestoreSdk.setDoc(
+                firestoreSdk.doc(db, 'users', window.firebaseAuth.currentUser.uid),
+                { photo: base64Photo },
+                { merge: true }
+            );
+            await chargerProfilEtReservations();
+        } catch (error) {
+            console.error('Erreur lors de l’enregistrement de la photo Firestore:', error);
+            alert('Impossible d’enregistrer la photo. Vérifiez votre connexion et réessayez.');
+        }
+    };
+    reader.onerror = function() {
+        alert('Impossible de lire le fichier image sélectionné.');
     };
     reader.readAsDataURL(file);
 }
 
 // 7. LIEN DE VALIDATION
-function envoyerLienValidation() {
-    const emailConnecte = recupererEmailActif();
-    const utilisateurs = JSON.parse(localStorage.getItem('utilisateurs') || '[]');
-    const user = utilisateurs.find(u => (u.email || '').trim().toLowerCase() === emailConnecte);
-
-    if (!user) return;
-
-    const lienValidation = `${window.location.origin}/auth.html?action=valider&token=${user.tokenValidation || 'valid'}`;
-    const templateParams = {
-        name: user.nom,
-        email: user.email,
-        lien_validation: lienValidation
-    };
-
-    emailjs.send('service_p3hgn5k', 'template_8ng5jpb', templateParams)
-        .then(() => {
-            alert("Lien de validation envoyé avec succès à " + user.email);
-        })
-        .catch(err => {
-            console.error("Erreur EmailJS:", err);
-            alert("Impossible d'envoyer l'e-mail. Vérifiez la configuration EmailJS.");
-        });
+async function envoyerLienValidation() {
+    try {
+        const authSdk = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+        await authSdk.sendEmailVerification(window.firebaseAuth.currentUser);
+        alert('Un lien de vérification vient d’être envoyé à ' + recupererEmailActif() + '.');
+    } catch (error) {
+        console.error('Erreur lors de l’envoi de l’e-mail de vérification Firebase:', error);
+        alert('Impossible d’envoyer l’e-mail de vérification. Veuillez réessayer.');
+    }
 }
 
 // 8. UTILITAIRES
@@ -401,7 +475,19 @@ function afficherMessage(elementId, texte, couleur) {
     setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
-function deconnecter() {
-    localStorage.removeItem('utilisateurConnecte');
-    window.location.href = 'index.html';
+function envoyerEmailCompte(templateParams, templateId) {
+    if (!window.emailjs || typeof window.emailjs.send !== 'function') {
+        return Promise.reject(new Error('Le SDK EmailJS est indisponible.'));
+    }
+    if (Date.now() - dernierEmailCompte < DELAI_EMAIL_COMPTE_MS) {
+        return Promise.reject(new Error('Délai minimal entre les envois non respecté.'));
+    }
+    if (!templateParams || Object.values(templateParams).some(valeur =>
+        typeof valeur !== 'string' || valeur.length > 2000
+    )) {
+        return Promise.reject(new Error('Paramètres EmailJS invalides.'));
+    }
+
+    dernierEmailCompte = Date.now();
+    return window.emailjs.send('service_p3hgn5k', templateId, templateParams);
 }

@@ -230,10 +230,10 @@
     <div class="booking-form" style="max-width: 380px; width: 90%; text-align: center; background: white; padding: 32px; border-radius: 16px;">
         <h2 style="font-family: var(--serif); margin-bottom: 20px;">Espace Propriétaire</h2>
         <div class="form-group" style="margin-bottom: 14px;">
-            <input type="email" id="admin-email" placeholder="admin@gite-sailly.fr" required style="width: 100%;">
+            <input type="email" id="admin-email" maxlength="254" autocomplete="username" placeholder="admin@gite-sailly.fr" required style="width: 100%;">
         </div>
         <div class="form-group" style="margin-bottom: 14px;">
-            <input type="password" id="admin-password" placeholder="Mot de passe" required style="width: 100%;">
+            <input type="password" id="admin-password" maxlength="128" autocomplete="current-password" placeholder="Mot de passe" required style="width: 100%;">
         </div>
         <button onclick="tentativeConnexionAdmin()" class="btn btn-hero" style="width: 100%;">Se connecter</button>
         <p id="admin-error" style="color: #c33; margin-top: 15px; font-size: 0.85rem; display: none;">Identifiants incorrects.</p>
@@ -390,23 +390,23 @@
 
             <div style="margin-bottom: 14px;">
                 <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Nom du client / Voyageur</label>
-                <input type="text" id="edit-res-nom" placeholder="Ex: Jean Dupont (Airbnb)" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+                <input type="text" id="edit-res-nom" maxlength="100" placeholder="Ex: Jean Dupont (Airbnb)" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Téléphone</label>
-                    <input type="tel" id="edit-res-tel" placeholder="06 12 34 56 78" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+                    <input type="tel" id="edit-res-tel" maxlength="25" placeholder="06 12 34 56 78" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
                 </div>
                 <div>
                     <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Email (optionnel)</label>
-                    <input type="email" id="edit-res-email" placeholder="client@email.com" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
+                    <input type="email" id="edit-res-email" maxlength="254" placeholder="client@email.com" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box;">
                 </div>
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 5px;">Notes & Informations complémentaires</label>
-                <textarea id="edit-res-notes" rows="4" placeholder="Arrivée tardive 20h, lit bébé à préparer, code de la boîte à clés transmis, acompte réglé..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;"></textarea>
+                <textarea id="edit-res-notes" rows="4" maxlength="1000" placeholder="Arrivée tardive 20h, lit bébé à préparer, code de la boîte à clés transmis, acompte réglé..." style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;"></textarea>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -443,7 +443,7 @@
 
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Message explicatif (visible par le client)</label>
-                <textarea id="refus-message-client" rows="3" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;" placeholder="Expliquez la raison du refus..."></textarea>
+                <textarea id="refus-message-client" rows="3" maxlength="500" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;" placeholder="Expliquez la raison du refus..."></textarea>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">

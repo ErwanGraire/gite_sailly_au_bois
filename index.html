@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gîte de Sailly-au-Bois | Accueil</title>
+    <title>Une étape à Sailly-Au-Bois | Accueil</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -94,8 +94,8 @@
 
                 <!-- Identité du client -->
                 <div class="form-group">
-                    <input type="text" name="nom" placeholder="Nom complet" required>
-                    <input type="email" name="email" placeholder="Votre email" required>
+                    <input type="text" name="nom" maxlength="100" autocomplete="name" placeholder="Nom complet" required>
+                    <input type="email" name="email" maxlength="254" autocomplete="email" placeholder="Votre email" required>
                 </div>
 
                 <!-- Dates d'arrivée et de départ -->
@@ -126,7 +126,7 @@
 
                 <!-- Précisions -->
                 <div class="form-group">
-                    <textarea name="message" rows="4" placeholder="Votre message, nombre de personnes, questions particulières..." style="width: 100%;"></textarea>
+                    <textarea name="message" rows="4" maxlength="2000" placeholder="Votre message, nombre de personnes, questions particulières..." style="width: 100%;"></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-hero" style="width: 100%;">
@@ -143,12 +143,12 @@
 </section>
 
 <footer>
-    <p>&copy; 2026 Gîte de Sailly-au-Bois. Tous droits réservés.</p>
+    <p>&copy; 2026 Une étape à Sailly-Au-Bois. Tous droits réservés.</p>
 </footer>
 
 <script src="auth-utils.js"></script>
 <script src="calendrier.js"></script>
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 <script src="cookies.js"></script>
 </body>
 </html>

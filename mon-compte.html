@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Compte - Gîte de Sailly-au-Bois</title>
+    <title>Mon Compte - Une étape à Sailly-Au-Bois</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mon-compte.css">
@@ -84,12 +84,12 @@
 
                 <div class="info-group">
                     <label>NOM COMPLET</label>
-                    <input type="text" id="edit-nom" class="profile-input">
+                    <input type="text" id="edit-nom" class="profile-input" maxlength="100">
                 </div>
 
                 <div class="info-group">
                     <label>TÉLÉPHONE</label>
-                    <input type="tel" id="edit-tel" class="profile-input">
+                    <input type="tel" id="edit-tel" class="profile-input" maxlength="25">
                 </div>
 
                 <div class="info-group">
@@ -119,12 +119,12 @@
 
                 <div class="info-group">
                     <label>ANCIEN MOT DE PASSE</label>
-                    <input type="password" id="old-password" class="profile-input" placeholder="••••••••">
+                    <input type="password" id="old-password" class="profile-input" maxlength="128" autocomplete="current-password" placeholder="••••••••">
                 </div>
 
                 <div class="info-group">
                     <label>NOUVEAU MOT DE PASSE</label>
-                    <input type="password" id="new-password" class="profile-input" placeholder="••••••••">
+                    <input type="password" id="new-password" class="profile-input" minlength="6" maxlength="128" autocomplete="new-password" placeholder="••••••••">
                 </div>
 
                 <button onclick="changerMotDePasse()" class="btn btn-nav" style="width: 100%; background: #555; border: none; margin-bottom: 15px;">

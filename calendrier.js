@@ -23,22 +23,33 @@ function genererCalendrier() {
   const isAdmin = !!document.querySelector('.admin-container');
   const logementActif = getLogementSelectionne();
 
-  const dataLocal = JSON.parse(localStorage.getItem('reservations')) || [];
-  const reservations = (typeof reservationsData !== 'undefined' ? reservationsData : []).concat(dataLocal);
+  let reservations;
+  if (isAdmin) {
+    reservations = Array.isArray(window.reservationsData) ? window.reservationsData : [];
+  } else {
+    reservations = Array.isArray(window.reservationsData) ? window.reservationsData : [];
+  }
 
   // Dictionnaire : { "2026-09-15": { "La Bergerie": "confirmee", "Domaine complet": "en-attente" } }
   const occupationParDate = {};
+  const debutMois = new Date(Date.UTC(currentYear, currentMonth, 1));
+  const finMois = new Date(Date.UTC(currentYear, currentMonth + 1, 0));
 
   reservations.forEach(r => {
-    if (r.statut === 'annulee') return;
-    const debut = new Date(r.dateArrivee);
-    const fin = new Date(r.dateDepart);
+    if (!r || typeof r !== 'object' || r.statut === 'annulee' ||
+        !estDateISOValide(r.dateArrivee) || !estDateISOValide(r.dateDepart)) return;
+    const debut = new Date(`${r.dateArrivee}T00:00:00Z`);
+    const fin = new Date(`${r.dateDepart}T00:00:00Z`);
+    if (Number.isNaN(debut.getTime()) || Number.isNaN(fin.getTime()) || debut > fin) return;
+    const logement = typeof r.logement === 'string' ? r.logement : 'Domaine complet (5 logements)';
 
-    for (let d = new Date(debut); d <= fin; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(Math.max(debut.getTime(), debutMois.getTime()));
+         d <= fin && d <= finMois;
+         d.setUTCDate(d.getUTCDate() + 1)) {
       const iso = d.toISOString().split('T')[0];
       if (!occupationParDate[iso]) occupationParDate[iso] = {};
 
-      const log = r.logement || "Domaine complet (5 logements)";
+      const log = logement;
       // Si domaine complet réservé, tous les sous-logements sont occupés
       if (log.includes("Domaine complet")) {
         LISTE_LOGEMENTS.forEach(l => {
