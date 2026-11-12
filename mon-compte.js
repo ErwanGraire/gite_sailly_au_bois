@@ -19,22 +19,6 @@ function recupererEmailActif() {
     return typeof email === 'string' && estEmailValide(email) ? email.trim().toLowerCase() : null;
 }
 
-function lireTableauCompte(cle) {
-    const resultat = lireJSONSecurise(cle, []);
-    if (!resultat.ok || !Array.isArray(resultat.valeur) ||
-        resultat.valeur.some(element => !element || typeof element !== 'object' || Array.isArray(element))) {
-        alert('Impossible de lire les données : stockage local indisponible ou données invalides.');
-        return null;
-    }
-    return resultat.valeur;
-}
-
-function enregistrerTableauCompte(cle, valeur) {
-    if (ecrireJSONSecurise(cle, valeur)) return true;
-    alert('Impossible d’enregistrer les changements : stockage local indisponible ou plein.');
-    return false;
-}
-
 function changerFiltreClient(onglet) {
     filtreActifClient = onglet;
     document.querySelectorAll('.client-tab').forEach(b => {
@@ -60,22 +44,28 @@ async function chargerProfilEtReservations() {
         return;
     }
 
-    const reservationsToutes = lireTableauCompte('reservations');
-    if (!reservationsToutes) return;
-
     let profil = {};
+    let mesReservations = [];
     try {
         const [{ db }, firestoreSdk] = await Promise.all([
             import('./firebase-config.js'),
             import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
         ]);
-        const profilSnapshot = await firestoreSdk.getDoc(
-            firestoreSdk.doc(db, 'users', utilisateurFirebase.uid)
-        );
+        const [profilSnapshot, reservationsSnapshot] = await Promise.all([
+            firestoreSdk.getDoc(firestoreSdk.doc(db, 'users', utilisateurFirebase.uid)),
+            firestoreSdk.getDocs(firestoreSdk.query(
+                firestoreSdk.collection(db, 'reservations'),
+                firestoreSdk.where('email', '==', emailConnecte)
+            ))
+        ]);
         if (profilSnapshot.exists()) profil = profilSnapshot.data();
+        mesReservations = reservationsSnapshot.docs.map(reservationDoc => ({
+            ...reservationDoc.data(),
+            id: reservationDoc.id
+        }));
     } catch (error) {
-        console.error('Impossible de charger le profil Firestore:', error);
-        alert('Impossible de charger vos informations de profil. Veuillez réessayer.');
+        console.error('Impossible de charger le profil ou les réservations Firestore:', error);
+        alert('Impossible de charger vos informations ou réservations. Veuillez réessayer.');
         return;
     }
     const utilisateur = {
@@ -125,11 +115,6 @@ async function chargerProfilEtReservations() {
         }
     }
 
-    // Réservations de l'utilisateur
-    const mesReservations = reservationsToutes.filter(r => 
-        typeof r.email === 'string' && r.email.trim().toLowerCase() === emailConnecte
-    );
-
     // Tri par date d'arrivée la plus proche
     mesReservations.sort((a, b) => new Date(a.dateArrivee) - new Date(b.dateArrivee));
 
@@ -164,8 +149,11 @@ async function chargerProfilEtReservations() {
     }
 
     conteneurListe.innerHTML = listeAffichee.map(res => {
-        const reservationId = Number(res.id);
-        const idValide = Number.isSafeInteger(reservationId);
+        const reservationId = typeof res.id === 'string' ? res.id : '';
+        const reservationIdPourClic = echapperHTML(
+            reservationId.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+        );
+        const idValide = reservationId.length > 0;
         const logement = echapperHTML(res.logement || 'Domaine complet');
         const dateArrivee = echapperHTML(res.dateArrivee || '');
         const dateDepart = echapperHTML(res.dateDepart || '');
@@ -179,14 +167,14 @@ async function chargerProfilEtReservations() {
 
         if (estValidee) {
             badgeHtml = `<span class="badge badge-valide">● Séjour confirmé</span>`;
-            boutonInfos = idValide ? `<button class="btn-action" style="background:#0f172a; color:white;" onclick="ouvrirModalSejour(${reservationId})">🗝️ Consignes & Arrivée</button>` : '';
-            boutonAction = idValide ? `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${reservationId})">Annuler le séjour</button>` : '';
+            boutonInfos = idValide ? `<button class="btn-action" style="background:#0f172a; color:white;" onclick="ouvrirModalSejour('${reservationIdPourClic}')">🗝️ Consignes & Arrivée</button>` : '';
+            boutonAction = idValide ? `<button class="btn-action btn-annuler" onclick="demanderAnnulation('${reservationIdPourClic}')">Annuler le séjour</button>` : '';
         } else if (estAnnulee) {
             badgeHtml = `<span class="badge badge-annule">● Annulée</span>`;
             boutonAction = `<span style="color: #94a3b8; font-size: 0.8rem; font-style: italic;">Dossier clos</span>`;
         } else {
             badgeHtml = `<span class="badge badge-attente">● En attente de validation</span>`;
-            boutonAction = idValide ? `<button class="btn-action btn-annuler" onclick="demanderAnnulation(${reservationId})">Annuler la demande</button>` : '';
+            boutonAction = idValide ? `<button class="btn-action btn-annuler" onclick="demanderAnnulation('${reservationIdPourClic}')">Annuler la demande</button>` : '';
         }
 
         let motifBloc = '';
@@ -225,11 +213,26 @@ async function chargerProfilEtReservations() {
 }
 
 // 2. MODALE DÉTAILS, CONSIGNES & CONTACT HÔTE
-function ouvrirModalSejour(id) {
-    const reservations = lireTableauCompte('reservations');
-    if (!reservations) return;
-    const res = reservations.find(r => r.id === id);
-    if (!res) return;
+async function ouvrirModalSejour(id) {
+    let res;
+    try {
+        const [{ db }, firestoreSdk] = await Promise.all([
+            import('./firebase-config.js'),
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+        ]);
+        const reservationSnapshot = await firestoreSdk.getDoc(
+            firestoreSdk.doc(db, 'reservations', id)
+        );
+        if (!reservationSnapshot.exists()) {
+            alert('Cette réservation est introuvable.');
+            return;
+        }
+        res = reservationSnapshot.data();
+    } catch (error) {
+        console.error('Impossible de charger les détails de la réservation:', error);
+        alert('Impossible de charger les détails du séjour. Veuillez réessayer.');
+        return;
+    }
 
     document.getElementById('modal-logement-titre').textContent =
         `Modalités — ${res.logement || 'Domaine complet'}`;
@@ -341,7 +344,7 @@ async function changerMotDePasse() {
 }
 
 // 5. ANNULATION PAR LE CLIENT AVEC ALERTE HÔTE
-function demanderAnnulation(resId) {
+async function demanderAnnulation(resId) {
     const motif = prompt("Indiquez la raison de votre annulation pour l'hôte :");
     if (motif === null) return;
 
@@ -351,28 +354,39 @@ function demanderAnnulation(resId) {
         return;
     }
 
-    let reservations = lireTableauCompte('reservations');
-    if (!reservations) return;
-    let resAnnulee = null;
-
-    reservations = reservations.map(r => {
-        if (r.id === resId) {
-            resAnnulee = {
-                ...r,
-                statut: 'annulee',
-                motifAnnulation: motifSaisi || 'Annulé par le client'
-            };
-            return resAnnulee;
+    let reservationAnnulee;
+    try {
+        const [{ db }, firestoreSdk] = await Promise.all([
+            import('./firebase-config.js'),
+            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
+        ]);
+        const reservationRef = firestoreSdk.doc(db, 'reservations', resId);
+        const reservationSnapshot = await firestoreSdk.getDoc(reservationRef);
+        if (!reservationSnapshot.exists()) {
+            alert('Cette réservation est introuvable.');
+            return;
         }
-        return r;
-    });
-
-    if (!resAnnulee || !enregistrerTableauCompte('reservations', reservations)) return;
-    chargerProfilEtReservations();
-
-    if (resAnnulee) {
-        envoyerAlerteAnnulationHote(resAnnulee);
+        reservationAnnulee = {
+            ...reservationSnapshot.data(),
+            id: resId,
+            statut: 'annulee',
+            motifAnnulation: motifSaisi || 'Annulé par le client'
+        };
+        await firestoreSdk.updateDoc(
+            reservationRef,
+            {
+                statut: reservationAnnulee.statut,
+                motifAnnulation: reservationAnnulee.motifAnnulation
+            }
+        );
+        await chargerProfilEtReservations();
+    } catch (error) {
+        console.error('Impossible d’annuler la réservation dans Firestore:', error);
+        alert('Impossible d’enregistrer l’annulation. Veuillez réessayer.');
+        return;
     }
+
+    envoyerAlerteAnnulationHote(reservationAnnulee);
 }
 
 function envoyerAlerteAnnulationHote(res) {

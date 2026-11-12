@@ -8,8 +8,8 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import {
     doc,
-    setDoc,
-    serverTimestamp
+    getDoc,
+    setDoc
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const DELAI_RESET_MS = 60000;
@@ -152,10 +152,12 @@ if (formConnexion) {
         actionAuthentificationEnCours = true;
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const userSnapshot = await getDoc(doc(db, 'users', userCredential.user.uid));
+            const role = userSnapshot.exists() ? userSnapshot.data().role : null;
             afficherMessage('✅ Connexion réussie ! Redirection...', 'success');
             setTimeout(() => {
-                window.location.href = 'index.html#reserver';
+                window.location.href = role === 'admin' ? 'admin.html' : 'mon-compte.html';
             }, 1000);
         } catch (error) {
             afficherMessage(messageErreurFirebase(error), 'error');
@@ -235,23 +237,24 @@ if (formInscription) {
 
         let compteCree = false;
         try {
-            const credential = await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             compteCree = true;
-            await setDoc(doc(db, 'users', credential.user.uid), {
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
                 nom,
                 prenom,
-                email: credential.user.email || email,
+                email: userCredential.user.email || email,
                 telephone,
-                createdAt: serverTimestamp()
+                role: 'client',
+                createdAt: new Date().toISOString()
             });
             if (typeof window.actualiserProfilFirebase === 'function') {
                 window.actualiserProfilFirebase({
-                    uid: credential.user.uid,
+                    uid: userCredential.user.uid,
                     nom,
                     prenom,
-                    email: credential.user.email || email,
+                    email: userCredential.user.email || email,
                     telephone,
-                    emailVerified: credential.user.emailVerified
+                    emailVerified: userCredential.user.emailVerified
                 });
             }
 

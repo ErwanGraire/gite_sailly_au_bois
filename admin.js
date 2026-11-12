@@ -1,3 +1,13 @@
+import { db } from './firebase-config.js';
+import {
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    setDoc,
+    updateDoc
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
 const ADMIN_CREDENTIALS = {
     email: "admin@gite-sailly.fr",
     password: "Sailly2024"
@@ -6,32 +16,10 @@ const ADMIN_CREDENTIALS = {
 let statutFiltreActif = 'en-attente';
 let dernierEnvoiEmailAdmin = 0;
 const DELAI_ENTRE_EMAILS_ADMIN = 5000;
-let dbAdmin;
-let firestoreAdmin;
 let reservationsAdmin = [];
-let firestoreAdminReady;
-
-function initialiserFirestoreAdmin() {
-    if (!firestoreAdminReady) {
-        firestoreAdminReady = Promise.all([
-            import('./firebase-config.js'),
-            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
-        ]).then(([configuration, firestore]) => {
-            dbAdmin = configuration.db;
-            firestoreAdmin = firestore;
-        }).catch(error => {
-            console.error('Impossible d’initialiser Firestore pour le calendrier admin:', error);
-            throw error;
-        });
-    }
-    return firestoreAdminReady;
-}
 
 async function chargerReservationsFirestore() {
-    await initialiserFirestoreAdmin();
-    const snapshot = await firestoreAdmin.getDocs(
-        firestoreAdmin.collection(dbAdmin, 'reservations')
-    );
+    const snapshot = await getDocs(collection(db, 'reservations'));
     reservationsAdmin = snapshot.docs.map(reservationDoc => ({
         ...reservationDoc.data(),
         id: reservationDoc.id
@@ -41,12 +29,8 @@ async function chargerReservationsFirestore() {
 }
 
 async function enregistrerReservationFirestore(reservation) {
-    await initialiserFirestoreAdmin();
     const { id, ...donnees } = reservation;
-    await firestoreAdmin.setDoc(
-        firestoreAdmin.doc(dbAdmin, 'reservations', id),
-        donnees
-    );
+    await setDoc(doc(db, 'reservations', id), donnees);
 }
 
 function afficherErreurChargementReservations(error) {
@@ -385,10 +369,7 @@ async function bloquerDatesManuel(e) {
     }
 
     try {
-        await initialiserFirestoreAdmin();
-        const referenceBlocage = firestoreAdmin.doc(
-            firestoreAdmin.collection(dbAdmin, 'reservations')
-        );
+        const referenceBlocage = doc(collection(db, 'reservations'));
         const nouveauBlocage = {
             nom: `Bloqué (${motif})`,
             email: "proprietaire@gite-sailly.fr",
@@ -402,7 +383,7 @@ async function bloquerDatesManuel(e) {
             dateCreation: new Date().toISOString()
         };
 
-        await firestoreAdmin.setDoc(referenceBlocage, nouveauBlocage);
+        await setDoc(referenceBlocage, nouveauBlocage);
         reservationsAdmin.push({ ...nouveauBlocage, id: referenceBlocage.id });
     } catch (error) {
         console.error('Erreur lors de l’enregistrement du blocage Firestore:', error);
@@ -480,20 +461,22 @@ async function confirmerRefusReservation(e) {
 
     const reservation = lireReservationsAdmin().find(r => r.id === id);
     if (!reservation) return;
-    const reservationRefusee = {
-        ...reservation,
-        statut: 'annulee',
-        motifAnnulation: motif
-    };
-
     try {
-        await enregistrerReservationFirestore(reservationRefusee);
+        await updateDoc(doc(db, 'reservations', id), {
+            statut: 'annulee',
+            motifAnnulation: motif
+        });
     } catch (error) {
         console.error('Erreur lors de l’annulation Firestore:', error);
         alert('Impossible d’enregistrer l’annulation dans Firebase. Veuillez réessayer.');
         return;
     }
     fermerModalRefus();
+    const reservationRefusee = {
+        ...reservation,
+        statut: 'annulee',
+        motifAnnulation: motif
+    };
     await chargerDonneesAdmin();
 
     // Envoi de l'e-mail explicatif au client s'il s'agit d'une vraie réservation client
@@ -507,9 +490,8 @@ async function confirmerRefusReservation(e) {
 async function executerChangementStatut(id, nouveauStatut) {
     const reservation = lireReservationsAdmin().find(res => res.id === id);
     if (!reservation) return;
-    const reservationConcernee = { ...reservation, statut: nouveauStatut };
     try {
-        await enregistrerReservationFirestore(reservationConcernee);
+        await updateDoc(doc(db, 'reservations', id), { statut: nouveauStatut });
     } catch (error) {
         console.error('Erreur lors de la mise à jour du statut Firestore:', error);
         alert('Impossible d’enregistrer ce changement dans Firebase. Veuillez réessayer.');
@@ -517,6 +499,7 @@ async function executerChangementStatut(id, nouveauStatut) {
     }
     await chargerDonneesAdmin();
 
+    const reservationConcernee = { ...reservation, statut: nouveauStatut };
     if (nouveauStatut === 'confirmee' && reservationConcernee && reservationConcernee.source !== 'manuel') {
         envoyerEmailConfirmationClient(reservationConcernee);
     }
@@ -583,10 +566,7 @@ async function sauvegarderDetailsEdition(e) {
 async function supprimerReservation(id) {
     if (!confirm("Voulez-vous retirer définitivement cette entrée ?")) return;
     try {
-        await initialiserFirestoreAdmin();
-        await firestoreAdmin.deleteDoc(
-            firestoreAdmin.doc(dbAdmin, 'reservations', id)
-        );
+        await deleteDoc(doc(db, 'reservations', id));
         reservationsAdmin = reservationsAdmin.filter(reservation => reservation.id !== id);
         await chargerDonneesAdmin();
     } catch (error) {
@@ -684,3 +664,16 @@ function envoyerEmailRefusClient(res, motif) {
             alert("La réservation a été annulée dans le système, mais l'envoi du mail au client a échoué.");
         });
 }
+
+Object.assign(window, {
+    tentativeConnexionAdmin,
+    deconnecterAdmin,
+    bloquerDatesManuel,
+    changerOngletStatut,
+    chargerDonneesAdmin,
+    fermerModalEdition,
+    sauvegarderDetailsEdition,
+    fermerModalRefus,
+    confirmerRefusReservation,
+    changerMotifPredefini
+});
