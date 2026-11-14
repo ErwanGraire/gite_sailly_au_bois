@@ -253,22 +253,21 @@ async function ouvrirModalSejour(id) {
 
         <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #0f172a;">🕒 Horaires</h4>
         <p style="font-size: 0.88rem; color: #475569; margin: 0 0 14px 0;">
-            • <strong>Arrivée :</strong> à partir de 16h00<br>
-            • <strong>Départ :</strong> avant 11h00
+            • <strong>Arrivée :</strong> à partir de 17h00<br>
+            • <strong>Départ :</strong> avant 10h00
         </p>
 
-        <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #0f172a;">🔑 Accès autonome / Clés</h4>
+        <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #0f172a;">🔑 Remise des clés</h4>
         <p style="font-size: 0.88rem; color: #475569; margin: 0 0 14px 0;">
-            Une boîte à clés sécurisée est située à l'entrée de votre logement.<br>
-            Le code d'accès vous est transmis par SMS ou message la veille de votre arrivée.
+            Les clés sont à récupérer directement auprès du propriétaire à votre arrivée.
         </p>
 
         <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; margin-bottom: 18px;">
             <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #065f46;">📞 Contacter l'hôte</h4>
             <p style="margin: 0; font-size: 0.85rem; color: #047857; line-height: 1.6;">
                 Une question sur votre séjour ou une arrivée tardive ?<br>
-                Téléphone : <a href="tel:0600000000" style="color: inherit; font-weight: bold; text-decoration: underline;">06 00 00 00 00</a><br>
-                Email : <a href="mailto:admin@gite-sailly.fr" style="color: inherit; font-weight: bold; text-decoration: underline;">admin@gite-sailly.fr</a>
+                Téléphone : <a href="tel:0681738043" style="color: inherit; font-weight: bold; text-decoration: underline;">06 81 73 80 43</a><br>
+                Email : <a href="mailto:gitesailly@gmail.com" style="color: inherit; font-weight: bold; text-decoration: underline;">gitesailly@gmail.com</a>
             </p>
         </div>
     `;
@@ -403,7 +402,7 @@ function envoyerAlerteAnnulationHote(res) {
     `;
 
     const templateParams = {
-        email_destinataire: "admin@gite-sailly.fr",
+        email_destinataire: "gitesailly@gmail.com",
         sujet: `🔔 Annulation séjour : ${nom} — ${logement}`,
         titre_principal: "Un séjour a été annulé",
         couleur_titre: "#ea580c",
